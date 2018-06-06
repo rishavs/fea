@@ -1,9 +1,37 @@
 {
   "host": "localhost",
-  "port": 3030,
+  "port": 3000,
   "public": "../public/",
   "paginate": {
     "default": 10,
     "max": 50
+  },
+  "postgres": {
+    "client": "pg",
+    "connection": "postgres://postgres:@localhost:5432/fea"
+  },
+  "authentication": {
+    "secret": "21fbdef54ddc29f1c0b900ec842546ed2e046751d9aae385014d50def8b019069f9df3a2586f4fc44a0edf8b1a0e0dcb20b039c701102478b6e5deefdcdc9692c25172907b30abbf6a48d252e0ddf912077f7c3bebd69dd3b8be57605799c39ffa42b8b6a069706c08bee9dfcf9b376c9e6d407b757ea6ead8937755c6adf1d1ca14ba61549f13da7909d6f88027ee3da629ba0210880c9f480101cf592897505aa1e187dc960b247ffc355166e1fdd55dfb5c07c6616d9c7f9fe41af090f7893db9b99db9a71934ed449dd68540233489d193547b256d92f3d056767d7346c55a8f3e9b95a53946e2c7e3a690bc1272f435b8ae4b058ad5c8ecdadeb9e5ecf2",
+    "strategies": [
+      "jwt",
+      "local"
+    ],
+    "path": "/authentication",
+    "service": "users",
+    "jwt": {
+      "header": {
+        "typ": "access"
+      },
+      "audience": "https://yourdomain.com",
+      "subject": "anonymous",
+      "issuer": "feathers",
+      "algorithm": "HS256",
+      "expiresIn": "1d"
+    },
+    "local": {
+      "entity": "user",
+      "usernameField": "email",
+      "passwordField": "password"
+    }
   }
 }
