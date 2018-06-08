@@ -14,10 +14,10 @@ module.exports = function (app) {
   };
 
   // Initialize our service with any options it requires
-  app.use('/api/messages', createService(options));
+  app.use('/messages', createService(options));
 
   // Get our initialized service so that we can register hooks and filters
-  const service = app.service('api/messages');
+  const service = app.service('messages');
 
   service.hooks(hooks);
 };

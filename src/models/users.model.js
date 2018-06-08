@@ -12,8 +12,9 @@ module.exports = function (app) {
       db.schema.createTable(tableName, table => {
         table.increments('id');
       
-        table.string('email').unique();
+        table.string('username').unique();
         table.string('name');
+        table.string('email');
         table.string('password');
           
       })
