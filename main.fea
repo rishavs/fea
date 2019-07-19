@@ -1,0 +1,15 @@
+Fea supports letrate programming.
+Every fea file is also a markdown file.
+Only the bits in the code blocks will be compiled.
+
+## this part is code
+```
+a:int -> 2
+b:str -> "Hello"
+c:truth -> true
+c:truth -> false
+
+show x
+```
+
+The compiler will treat everything else as comments and ignore them.
