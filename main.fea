@@ -9,7 +9,13 @@ b:str -> "Hello"
 c:truth -> true
 c:truth -> false
 
-show x
 ```
 
 The compiler will treat everything else as comments and ignore them.
+
+```
+c:truth -> true
+c:truth -> false
+```
+
+The compiler will stitch all code blocks together.
