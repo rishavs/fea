@@ -6,6 +6,7 @@
 
 The Fea compiler is written in Nim
 
+Inspired by F#, attolang and Keli language.
 
 
 ## License
