@@ -12,3 +12,7 @@ bin           = @["fea"]
 # Dependencies
 
 requires "nim >= 0.20.0"
+requires "npeg >= 0.12.0"
+
+task dev, "Runs the test suite":
+    exec "nim c -r src/fea.nim"

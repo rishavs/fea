@@ -6,8 +6,10 @@ Only the bits in the code blocks will be compiled.
 ```
 a:int -> 2
 b:str -> "Hello"
-c:truth -> true
-c:truth -> false
+// This is a comment. Ends with line end //
+
+
+हिंदी:str => "यूनिकोड"
 
 ```
 
@@ -15,7 +17,7 @@ The compiler will treat everything else as comments and ignore them.
 
 ```
 c:truth -> true
-c:truth -> false
+d:truth -> false
 ```
 
 The compiler will stitch all code blocks together.
