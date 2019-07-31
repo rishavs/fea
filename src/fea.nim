@@ -4,7 +4,7 @@ proc get_code_text(fileContent: string):string =
     var code            = ""
     var line_num        = 1
     var i               = 0
-    var code_block_open = false
+    var is_code_block_open = false
     let file_length = fileContent.len
 
     while i < file_length-3: # this is to ensure that the lokahead doesnt goes out of bounds
@@ -13,10 +13,10 @@ proc get_code_text(fileContent: string):string =
             line_num = line_num + 1
 
         if fileContent[i] == '`' and fileContent[i+1] == '`' and fileContent[i+2] == '`':
-            code_block_open = not code_block_open
+            is_code_block_open = not is_code_block_open
             i = i + 3
 
-        if code_block_open:
+        if is_code_block_open:
             code.add($fileContent[i])
 
         i = i + 1

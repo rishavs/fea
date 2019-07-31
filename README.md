@@ -37,6 +37,8 @@ Quick thoughts
 
 - utf8 strings
 
+- FRP?
+
 - memory. ARC vs Immix?
 
 - has algebraic types and maybes
@@ -44,6 +46,7 @@ Quick thoughts
 - how to error? railroad?
 
 - hot reloading? with a aot release version for speedup?
+- All keywords can be fully internationalized
 
 - build types [dev(fastest compilation), debug, release(fastest execution and low overhead)]
 
@@ -66,12 +69,82 @@ Quick thoughts
   all code is either expression or function.
 
 ```
-a:int 	=> 2
-b:str 	=> "Hello"
-c:truth => true
-d:truth => false
+int a is 2
 
-हिंदी:str => "यूनिकोड"
+define Circle as {
+    radius: Int,
+    circumference:Int
+    }
+end
+
+Circle new_circle is {
+    radius is 10,
+    circumference is 20
+    }
+
+define LotsaCircles as
+    List of Circle
+end
+
+define Answer as
+    | Yes
+    | No
+end
+
+
+// retruns/retrun/returning are all same//
+
+do substract int a, int b return int as
+    if a < b and a > 0 and b > 0
+        say "Can't do. 0 is my best offer!"
+        0
+    else 
+        a - b
+    end
+end
+
+
+
+do additionof a, b as a + b end
+
+int a is additionof 2, 3
+
+do add_then_square_and_check_even 
+    int a, int b 
+    return 
+        fact, string 
+    as
+        x   is checkifeven square add a,b
+        x   is flow add a,b then square then checkifeven end
+
+end
+
+do ifelseflow fact isTrue return 
+    say "Is True"
+
+// builtin?
+define case as {
+    path1: do,
+    path2:  block
+    }
+end
+
+Case caseflow is {
+    4 : fncall1,
+    5 : fncall2,
+    _ : fncall3  
+}
+
+map caseflow int k, block v 
+
+eval ( int x) return int as
+    y is 
+    if x < 5 then 
+        something
+    elseif x >10 then something
+    else something
+    end
+
 ```
 
 # Rough
