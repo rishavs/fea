@@ -8,6 +8,13 @@ The Fea compiler is written in Nim
 
 Inspired by F#, attolang and Keli language.
 
+## Principles (in order of priority)
+1. Dev Exp is most important
+2. Batteries included
+3. Instant compilation
+4. Readability
+5. C like performance
+
 # Rough
 
 
@@ -16,6 +23,8 @@ Quick thoughts
 
 - literate. Everything is a comment. 
   Except the bits which are in the markdown code tags 
+  
+ - each file is a package. see ES6 imports/exports for how modules should behave 
 
 - extremely small. all syntax "should fit on a postcard"
 
