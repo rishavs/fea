@@ -9,13 +9,15 @@ export class Parser {
     // the only parser
     is(tokenName) {
         return () => {
+            let res = {ok: false, parsed: [], node: {}}
             if (this.i >= this.tokens.length) {
-                return {ok: false, parsed: [], node: []}
+                return res
             }
-            let res = {ok: false, parsed: [this.tokens[this.i]], node: []}
             if (this.tokens[this.i].kind === tokenName) {
-                this.i += 1
                 res.ok = true
+                res.parsed.push(this.tokens[this.i])
+                res.node.value = this.tokens[this.i].value
+                this.i += 1
                 return res
             }
             return res
@@ -23,59 +25,50 @@ export class Parser {
     }
 
     // Combinators
-    seq(parsers, mutater, nodify) {
+    seq(parsers) {
         return () => {
             let backup = this.i
-            let res = {ok: false, parsed: [], node: []}
+            let res = {ok: false, parsed: [], node: {children: []}}
 
             for (let parser of parsers) {
                 let pout = parser()
                 if (pout.ok) {
                     res.parsed.push(...pout.parsed)
+                    if (pout.node) {
+                        res.node.children.push(pout.node)
+                    }
                     // console.log(res)
                 } else {
                     this.i = backup
                     res.ok = false
+                    res.parsed = []
+                    res.node = {}
                     return res
                 }
             }
             res.ok = true
-            if (mutater) {
-                res = mutater(res)
-            }
-            if (nodify) {
-                // create child node
-                let node = nodify(res, this.ast)
 
-                // add node to ast
-                this.ast.push(node)
-
-                // add node to parent's children
-                this.ast[node.parent].children.push(this.ast.length - 1)
-            }
-            
             return res
         }
     }
     
-    either(parsers, raise) {
+    either(parsers) {
         return () => {
             let backup = this.i
-            let res = {ok: false, parsed: []}
+            let res = {ok: false,parsed: [], node: {}}
 
             for (let parser of parsers) {
                 let pout = parser()
                 if (pout.ok) {
                     res.ok = true
                     res.parsed.push(...pout.parsed)
+                    res.node = pout.node
                     return res
                 }
             }
             this.i = backup
             res.ok = false
-            if (raise) {
-                raise(res)
-            }
+            
             return res
         }
     }
@@ -86,18 +79,21 @@ export class Parser {
             if (pout.ok) {
                 return pout
             } 
-            return {ok: true, parsed: pout.parsed}
+            return {ok: true, parsed: pout.parsed, node: {}}
         }
     }
 
     zeroOrMany(parser) {
         return () => {
-            let res = {ok: true, parsed: [], node: []}
+            let res = {ok: true, parsed: [], node: {children:[]}}
 
             while (true) {
                 let pout = parser()
                 if (pout.ok) {
                     res.parsed.push(...pout.parsed)
+                    if (pout.node) {
+                        res.node.children.push(pout.node)
+                    }
                 } else {
                     break
                 }
@@ -109,14 +105,18 @@ export class Parser {
     oneOrMany(parser) {
         return () => {
             let backup = this.i
-            let res = {ok: false, parsed: []}
+            let res = {ok: false,parsed: [], node: {children: []}}
             let atLeastOne = false
+            let tempChildren = []
 
             while (true) {
                 let pout = parser()
                 if (pout.ok) {
                     atLeastOne = true
                     res.parsed.push(...pout.parsed)
+                    if (pout.node) {
+                        tempChildren.push(pout.node)
+                    }
                 } else {
                     this.i = backup
                     break
@@ -124,9 +124,22 @@ export class Parser {
             }
             if (atLeastOne) {
                 res.ok = true
+                res.node.children = tempChildren
             }
             return res
         }
     }
+
+    hammer(parser, mutater) {
+        return () => {
+            let res = parser()
+            if (mutater) {
+                res = mutater(res)
+            }
+            
+            return res
+        }
+    }
+
 
 }

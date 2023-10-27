@@ -21,14 +21,31 @@ const p = new Parser(tokens);
 
 // prob is that we are running out of i. someone is not handling the false case properly. not resetting?
 
-let literal = () => p.either([
+let literal = () => p.hammer(p.either([
     p.is("INT"),
     p.is("FLOAT"),
     p.is("EXPO"),
     p.is("STRING")
-])
+]), (res) => {
+    if (res.ok) {
+        res.node = {
+            name: `LITERAL:${res.parsed[0].kind}`,
+            value: res.parsed[0].value,
+            i: res.parsed[0].i,
+            line: res.parsed[0].line,
+        }
+    }
+    return res  
+})
 
-let identifier = () => p.seq(
+// let literal = () => p.either([
+//     p.is("INT"),
+//     p.is("FLOAT"),
+//     p.is("EXPO"),
+//     p.is("STRING")
+// ])
+
+let identifier = () => p.hammer(p.seq(
     [
         p.is("NAME"),
         p.zeroOrMany(
@@ -36,42 +53,37 @@ let identifier = () => p.seq(
                 p.is("."), p.is("NAME")
             ])
         )
-    ], 
-    // (res) => {
-    //     let merged = {
-    //         kind: "IDENTIFIER",
-    //         value: ""
-    //     }
-    //     // the min of all i will be merged.i
-    //     // the min of all lines will be merged.line
-    //     merged.i = 0
-    //     merged.line = 0
-    //     for (let item of res.parsed) {
-    //         merged.value += item.value
-    //         if (merged.i == 0) {
-    //             merged.i = item.i
-    //         } else if (item.i < merged.i) {
-    //             merged.i = item.i
-    //         }
-    //         if (merged.line == 0) {
-    //             merged.line = item.line
-    //         } else if (item.line < merged.line) {
-    //             merged.line = item.line
-    //         }
-    //     }
+    ]), (res) => {
+        if (res.ok) {
+            res.node = {
+                name: `LITERAL:IDENTIFIER`,
+            }
+            res.node.i = 0
+            res.node.line = 0
+            for (let item of res.parsed) {
+                res.node.value += item.value
+                if (res.node.i == 0) {
+                    res.node.i = item.i
+                } else if (item.i < res.node.i) {
+                    res.node.i = item.i
+                }
+                if (res.node.line == 0) {
+                    res.node.line = item.line
+                } else if (item.line < res.node.line) {
+                    res.node.line = item.line
+                }
+            }
+        }
+        return res  
+    }) 
 
-    //     return {
-    //         ok: true,
-    //         parsed: [merged]
-    //     }
-        
-    // }
-)
-
-let expression = () => p.either([
+let expression = () => p.hammer(p.either([
     literal(),
     identifier()
-])
+]), (res) => {
+    console.log("expression", res)
+    return res
+})
 
 let expressionsList = () => p.seq([
     expression(),
@@ -97,20 +109,9 @@ let expressionStatement = () => p.either([
 let statement = () => p.either([
     expressionStatement()
 ])
-
 let statements = () => p.oneOrMany(statement())
-
 let program = () => statements()
+let parse = program()
 
-
-// let ast =  [ { name: 'ROOT', depth: 0, children: [] } ]
-let result = program()
+let result = parse()
 console.log(result)
-console.log("AST :", p.ast)
-
-
-
-let variable = () => p.seq([
-    p.opt(p.is("PUB")), 
-    p.is("VAR")
-])
