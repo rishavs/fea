@@ -101,12 +101,9 @@ export class Lexer {
             let buffer = ch
             this.i += 1
             
-            let token = {
-                kind: "INT",
-                value: buffer,
-                i : this.i,
-                line : this.line,
-            }
+            let token = {}
+            token.kind = "INT"
+            token.value = buffer
 
             while (this.i < this.src.length) {
                 ch = this.src[this.i]
@@ -136,6 +133,24 @@ export class Lexer {
                     break
                 }
             }
+            
+            token.value = buffer
+            token.i = this.i
+            token.line = this.line
+
+            // Some error checks
+            if (token.kind === "FLOAT") {
+                if (token.value.endsWith(".")) {
+                    throw new Error("Invalid float literal at line " + this.line + " & pos " + this.i)
+                }
+            } else if (token.kind === "EXPO") {
+                if (token.value.endsWith("e")) {
+                    throw new Error("Invalid expo literal at line " + this.line + " & pos " + this.i)
+                }
+            } else {
+                // INT
+            }
+
             this.tokens.push (token)      
             return true      
         }
@@ -189,13 +204,15 @@ export class Lexer {
             // Operators
             case this.match(".")         : break
             case this.match(":")         : break
+            case this.match(",")         : break
             case this.match("=")         : break
+            case this.match("(")         : break
+            case this.match(")")         : break
 
             // Literals
             case this.number()           : break
             case this.string()           : break
-            case this.match("true")      : break
-            case this.match("false")     : break
+
                     
             default                 :
                 console.log("ERRORED! Tokens found so far: ", this.tokens)

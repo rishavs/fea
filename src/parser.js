@@ -9,6 +9,9 @@ export class Parser {
     // the only parser
     is(tokenName) {
         return () => {
+            if (this.i >= this.tokens.length) {
+                return {ok: false, parsed: [], node: []}
+            }
             let res = {ok: false, parsed: [this.tokens[this.i]], node: []}
             if (this.tokens[this.i].kind === tokenName) {
                 this.i += 1
@@ -83,14 +86,13 @@ export class Parser {
             if (pout.ok) {
                 return pout
             } 
-            return {ok: true, parsed: []}
+            return {ok: true, parsed: pout.parsed}
         }
     }
 
     zeroOrMany(parser) {
         return () => {
-            let backup = this.i
-            let res = {ok: true, parsed: []}
+            let res = {ok: true, parsed: [], node: []}
 
             while (true) {
                 let pout = parser()
