@@ -3,7 +3,7 @@ import { Parser } from "./parser.js";
 
 // TODO - fix the bug with 1.a as float
 // let src = `1.a.b.c.d.e`
-let src = `Core.exec ( a.c.x , 2, "yes")`
+let src = `var x = 1.2e3`
 
 const lexer = new Lexer(src);
 const tokens = lexer.run();
@@ -27,14 +27,15 @@ let literal = () => p.hammer(p.either([
     p.is("EXPO"),
     p.is("STRING")
 ]), (res) => {
-    if (res.ok) {
-        res.node = {
-            name: `LITERAL:${res.parsed[0].kind}`,
-            value: res.parsed[0].value,
-            i: res.parsed[0].i,
-            line: res.parsed[0].line,
-        }
-    }
+    console.log("literal", res)
+    // if (res.ok) {
+    //     res.node = {
+    //         name: `LITERAL:${res.parsed[0].kind}`,
+    //         value: res.parsed[0].value,
+    //         i: res.parsed[0].i,
+    //         line: res.parsed[0].line,
+    //     }
+    // }
     return res  
 })
 
@@ -46,72 +47,72 @@ let literal = () => p.hammer(p.either([
 // ])
 
 let identifier = () => p.hammer(p.seq(
-    [
         p.is("NAME"),
         p.zeroOrMany(
-            p.seq([
+            p.seq(
                 p.is("."), p.is("NAME")
-            ])
+            )
         )
-    ]), (res) => {
+    ), (res) => {
+        // console.log("identifier", res)
         if (res.ok) {
-            res.node = {
-                name: `LITERAL:IDENTIFIER`,
+            let out = {
+                kind: `IDENTIFIER`,
+                value: res.children[0].value,
+                i: res.children[0].i,
+                line: res.children[0].line,
             }
-            res.node.i = 0
-            res.node.line = 0
-            for (let item of res.parsed) {
-                res.node.value += item.value
-                if (res.node.i == 0) {
-                    res.node.i = item.i
-                } else if (item.i < res.node.i) {
-                    res.node.i = item.i
+            
+            if (res.children[1].ok && res.children[1].children ) {
+                for (let item of res.children[1].children) {
+                    out.value += item.children[0].value + item.children[1].value
+
+                    out.i = item.children[1].i
+                    out.line = item.children[1].line
                 }
-                if (res.node.line == 0) {
-                    res.node.line = item.line
-                } else if (item.line < res.node.line) {
-                    res.node.line = item.line
-                }
-            }
+            }   
+            return out
         }
-        return res  
+        return res
     }) 
 
-let expression = () => p.hammer(p.either([
+
+let expression = () => p.hammer(p.either(
     literal(),
     identifier()
-]), (res) => {
+), (res) => {
     console.log("expression", res)
     return res
 })
 
-let expressionsList = () => p.seq([
+let expressionsList = () => p.seq(
     expression(),
     p.zeroOrMany(
-        p.seq([
+        p.seq(
             p.is(","),
             expression()
-        ])
+        )
     )
-])
+)
 
-let functionCall = () => p.seq([
+let functionCall = () => p.seq(
     identifier(),
     p.is("("),
     expressionsList(),
     p.is(")")
-])
+)
 
-let expressionStatement = () => p.either([
+let expressionStatement = () => p.either(
     functionCall()
-])
+)
 
-let statement = () => p.either([
+let statement = () => p.either(
     expressionStatement()
-])
+)
 let statements = () => p.oneOrMany(statement())
 let program = () => statements()
+
 let parse = program()
 
-let result = parse()
-console.log(result)
+let result =  parse()
+console.log("AST: ", JSON.stringify(result, null, 2))
