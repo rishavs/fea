@@ -1,451 +1,191 @@
-export class Lexer {
-    constructor(src) {
-        this.src = src;
-        this.i = 0;
-        this.line = 1;
-        this.tokens = [];
-    }
+import { yell } from "./utils.js"
 
-    match(str) {
-        if (this.src.startsWith(str, this.i)) {
-            let token = {kind: str, value: str, i: this.i, line: this.line}
-            this.i += str.length;
-            this.tokens.push(token)
-            return true
+const match = (ctx, str) => {
+    if (ctx.src.startsWith(str, ctx.i)) {
+        let token = {kind: str, value: str, i: ctx.i, line: ctx.line}
+        ctx.i += str.length;
+        ctx.tokens.push(token)
+        return true
+    }
+    return false
+}
+
+const comment = (ctx) => {
+    if (ctx.src.startsWith('--', ctx.i)) {
+        ctx.i += 2
+        let foundEnd = false;
+        while (ctx.i < ctx.src.length) {
+            if (ctx.src.startsWith('--', ctx.i)) {
+                ctx.i += 2
+                foundEnd = true;
+                break;
+            }
+            ctx.i += 1
         }
-        return false
-    }
-
-    space() {
-        let ch = this.src[this.i]
-        if (ch === ' ' || ch === '\n' || ch === '\t' || ch === '\r') {
-            let token = {kind: "SPACE", value: "", i: this.i, line: this.line}
-
-            while (this.i < this.src.length) {
-                ch = this.src[this.i];
-                if (ch === ' ' || ch === '\t' || ch === '\r') {
-                    this.i++;
-                } else if (ch === '\n') {
-                    this.i++;
-                    this.line++;
-                } else {
-                    break;
-                }
-            }
-            // tokens.push( token )
-            return true
+        if (!foundEnd) {
+            yell("Unterminated comment at line " + ctx.line + " & pos " + ctx.i)
         }
-        return false
+        return true
     }
+    return false
+}
 
-    comment() {
-        if (this.src.startsWith('--', this.i)) {
-            this.i += 2
-            let foundEnd = false;
-            while (this.i < this.src.length) {
-                if (this.src.startsWith('--', this.i)) {
-                    this.i += 2
-                    foundEnd = true;
-                    break;
-                }
-                this.i += 1
+const space = (ctx) => {
+    let ch = ctx.src[ctx.i]
+    if (ch === ' ' || ch === '\n' || ch === '\t' || ch === '\r') {
+        let token = {kind: "SPACE", value: "", i: ctx.i, line: ctx.line}
+
+        while (ctx.i < ctx.src.length) {
+            ch = ctx.src[ctx.i];
+            if (ch === ' ' || ch === '\t' || ch === '\r') {
+                ctx.i++;
+            } else if (ch === '\n') {
+                ctx.i++;
+                ctx.line++;
+            } else {
+                break;
             }
-            if (!foundEnd) {
-                throw new Error("Unterminated comment at line " + this.line + " & pos " + this.i)
-            }
-            return true
         }
-        return false
+        // ctx.tokens.push( token )
+        return true
     }
+    return false
+}
 
-    kwdOrName () {
-        let ch = this.src[this.i];
-        if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z') {
-            let token = {
-                kind: "NAME",
-                value: "",
-                i : this.i,
-                line : this.line,
-            }
-            while (this.i < this.src.length) {
-                ch = this.src[this.i];
-                if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' || ch === '_') {
-                    token.value += ch;
-                    this.i++;
-                } else {
-                    break;
-                }
-            }
-            switch (token.value) {
-            case "var" :
-                token.kind = "VAR"
-                break
-            case "pub" :
-                token.kind = "PUB"
-                break
-            case "true" :
-                token.kind = "TRUE"
-                break
-            case "false" :
-                token.kind = "FALSE"
-                break
-            }                   
-            this.tokens.push(token);
-            return true
+const string = (ctx) => {
+    if (ctx.src.startsWith('"', ctx.i)) {
+        ctx.i++;
+        let token = {
+            kind: "STRING",
+            value: "",
+            i : ctx.i,
+            line : ctx.line,
         }
+        let foundEnd = false;
+
+        while (ctx.i < ctx.src.length) {
+            let ch = ctx.src[ctx.i];
+            if (ch === '"') {
+                ctx.i++;
+                foundEnd = true;
+                break;
+            }
+            token.value += ch;
+            ctx.i++;
+        }
+        if (!foundEnd) {
+            yell("Unterminated string at line " + ctx.line + " & pos " + ctx.i)
+        }
+        ctx.tokens.push(token);
+        return true
     }
+    return false
+} 
 
-    number() {
-        let ch = this.src[this.i];
-        if (ch >= '0' && ch <= '9') {
-            let buffer = ch
-            this.i += 1
-            
-            let token = {}
-            token.kind = "INT"
-            token.value = buffer
+const number = (ctx) => {
+    let ch = ctx.src[ctx.i];
+    if (ch >= '0' && ch <= '9') {
+        let buffer = ch
+        ctx.i += 1
+        
+        let token = {}
+        token.kind = "INT"
+        token.value = buffer
 
-            while (this.i < this.src.length) {
-                ch = this.src[this.i]
-                if (ch >= '0' && ch <= '9') {
-                    buffer += ch
-                    this.i += 1
-                } else if (ch == '_') {
-                    this.i += 1
-                    
-                } else if (ch == '.') {
-                    if (token.kind === "FLOAT") {
-                        break
-                    } else {
-                        token.kind = "FLOAT"
-                        buffer += ch
-                        this.i += 1
-                    }
-                } else if (ch == 'e') {
-                    if (token.kind === "EXPO") {
-                        break
-                    } else {
-                        token.kind = "EXPO"
-                        buffer += ch
-                        this.i += 1
-                    }
-                } else {
+        while (ctx.i < ctx.src.length) {
+            ch = ctx.src[ctx.i]
+            if (ch >= '0' && ch <= '9') {
+                buffer += ch
+                ctx.i += 1
+            } else if (ch == '_') {
+                ctx.i += 1
+                
+            } else if (ch == '.') {
+                if (token.kind === "FLOAT") {
                     break
-                }
-            }
-            
-            token.value = buffer
-            token.i = this.i
-            token.line = this.line
-
-            // Some error checks
-            if (token.kind === "FLOAT") {
-                if (token.value.endsWith(".")) {
-                    throw new Error("Invalid float literal at line " + this.line + " & pos " + this.i)
-                }
-            } else if (token.kind === "EXPO") {
-                if (token.value.endsWith("e")) {
-                    throw new Error("Invalid expo literal at line " + this.line + " & pos " + this.i)
+                } else {
+                    token.kind = "FLOAT"
+                    buffer += ch
+                    ctx.i += 1
                 }
             } else {
-                // INT
-            }
-
-            this.tokens.push (token)      
-            return true      
-        }
-        return false
-    }
-
-    string () {
-        if (this.src.startsWith('"', this.i)) {
-            this.i++;
-            let token = {
-                kind: "STRING",
-                value: "",
-                i : this.i,
-                line : this.line,
-            }
-            let foundEnd = false;
-
-            while (this.i < this.src.length) {
-                let ch = this.src[this.i];
-                if (ch === '"') {
-                    this.i++;
-                    foundEnd = true;
-                    break;
-                }
-                token.value += ch;
-                this.i++;
-            }
-            if (!foundEnd) {
-                throw new Error("Unterminated string at line " + this.line + " & pos " + this.i)
-            }
-            this.tokens.push(token);
-            return true
-        }
-        return false
-    }
-
-    run () {
-        while (this.i < this.src.length) {
-            switch (true) {
-            case this.space()            : break
-            case this.comment()          : break
-            
-            // Keywords & Operators
-            case this.kwdOrName()               : break
-            // case match("var")       : break
-            // case match("pub")       : break
-            
-            // Idenifiers
-            // case name()             : break
-
-            // Operators
-            case this.match(".")         : break
-            case this.match(":")         : break
-            case this.match(",")         : break
-            case this.match("=")         : break
-            case this.match("(")         : break
-            case this.match(")")         : break
-
-            // Literals
-            case this.number()           : break
-            case this.string()           : break
-
-                    
-            default                 :
-                console.log("ERRORED! Tokens found so far: ", this.tokens)
-                throw new Error(`Unexpected character '${this.src[this.i]}' at line ${this.line} & pos ${this.i}`) 
+                break
             }
         }
-        return this.tokens
+        
+        token.value = buffer
+        token.i = ctx.i
+        token.line = ctx.line
+
+        // Some error checks
+        if (token.kind === "FLOAT") {
+            if (token.value.endsWith(".")) {
+                yell("Invalid float literal at line " + ctx.line + " & pos " + ctx.i)
+            }
+        } else {
+            // INT
+        }
+
+        ctx.tokens.push (token)      
+        return true      
     }
+    return false
 }
-// export const lex = (src) => {
-//     let tokens = [];
-//     let i = 0;
-//     let line = 1;
 
-//     const match = (kwd) => {
-//         if (src.startsWith(kwd, i)) {
-//             let token = {kind: kwd.toUpperCase(), value: "", i: i, line: line}
-//             i += kwd.length;
-//             tokens.push(token)
-//             return true
-//         }
-//         return false
-//     }
+const name = (ctx) => {
+    let ch = ctx.src[ctx.i]
+    if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+        let token = {kind: "NAME", value: "", i: ctx.i, line: ctx.line}
+        while (ctx.i < ctx.src.length) {
+            ch = ctx.src[ctx.i];
+            if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+                token.value += ch;
+                ctx.i++;
+            } else {
+                break;
+            }
+        }
+        ctx.tokens.push(token);
+        return true
+    }
+    return false
+}
 
-//     const space = () => {
-//         let ch = src[i]
-//         if (ch === ' ' || ch === '\n' || ch === '\t' || ch === '\r') {
-//             let token = {kind: "SPACE", value: "", i: i, line: line}
 
-//             while (i < src.length) {
-//                 ch = src[i];
-//                 if (ch === ' ' || ch === '\t' || ch === '\r') {
-//                     i++;
-//                 } else if (ch === '\n') {
-//                     i++;
-//                     line++;
-//                 } else {
-//                     break;
-//                 }
-//             }
-//             // tokens.push( token )
-//             return true
-//         }
-//         return false
-//     }
 
-//     const comment = () => {
-//         if (src.startsWith('--', i)) {
-//             i += 2
-//             let foundEnd = false;
-//             while (i < src.length) {
-//                 if (src.startsWith('--', i)) {
-//                     i += 2
-//                     foundEnd = true;
-//                     break;
-//                 }
-//                 i += 1
-//             }
-//             if (!foundEnd) {
-//                 throw new Error("Unterminated comment at line " + line + " & pos " + i)
-//             }
-//             return true
-//         }
-//         return false
-//     }
-
-//     const string = () => {
-//         if (src.startsWith('"', i)) {
-//             i++;
-//             let token = {
-//                 kind: "STRING",
-//                 value: "",
-//                 i : i,
-//                 line : line,
-//             }
-//             let foundEnd = false;
-
-//             while (i < src.length) {
-//                 let ch = src[i];
-//                 if (ch === '"') {
-//                     i++;
-//                     foundEnd = true;
-//                     break;
-//                 }
-//                 token.value += ch;
-//                 i++;
-//             }
-//             if (!foundEnd) {
-//                 throw new Error("Unterminated string at line " + line + " & pos " + i)
-//             }
-//             tokens.push(token);
-//             return true
-//         }
-//         return false
-//     }
-
-//     const number = () => {
-//         let ch = src[i];
-//         if (ch >= '0' && ch <= '9') {
-//             let buffer = ch
-//             i += 1
-            
-//             let token = {
-//                 kind: "INT",
-//                 value: buffer,
-//                 i : i,
-//                 line : line,
-//             }
-
-//             while (i < src.length) {
-//                 ch = src[i]
-//                 if (ch >= '0' && ch <= '9') {
-//                     buffer += ch
-//                     i += 1
-//                 } else if (ch == '_') {
-//                     i += 1
-                    
-//                 } else if (ch == '.') {
-//                     if (token.kind === "FLOAT") {
-//                         break
-//                     } else {
-//                         token.kind = "FLOAT"
-//                         buffer += ch
-//                         i += 1
-//                     }
-//                 } else if (ch == 'e') {
-//                     if (token.kind === "EXPO") {
-//                         break
-//                     } else {
-//                         token.kind = "EXPO"
-//                         buffer += ch
-//                         i += 1
-//                     }
-//                 } else {
-//                     break
-//                 }
-//             }
-//             tokens.push (token)      
-//             return true      
-//         }
-//         return false
-//     }
-        
-
-//     const KwdOrName = () => {
-//         let ch = src[i];
-//         if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z') {
-//             let token = {
-//                 kind: "NAME",
-//                 value: "",
-//                 i : i,
-//                 line : line,
-//             }
-//             while (i < src.length) {
-//                 ch = src[i];
-//                 if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' || ch === '_') {
-//                     token.value += ch;
-//                     i++;
-//                 } else {
-//                     break;
-//                 }
-//             }
-//             switch (token.value) {
-//             case "var" :
-//                 token.kind = "VAR"
-//                 break
-//             case "pub" :
-//                 token.kind = "PUB"
-//                 break
-//             case "true" :
-//                 token.kind = "TRUE"
-//                 break
-//             case "false" :
-//                 token.kind = "FALSE"
-//                 break
-//             }                   
-//             tokens.push(token);
-//             return true
-//         }
-//     }
-
-//     const name = () => {
-//         let ch = src[i];
-//         if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z') {
-//             let token = {
-//                 kind: "NAME",
-//                 value: "",
-//                 i : i,
-//                 line : line,
-//             }
-//             while (i < src.length) {
-//                 ch = src[i];
-//                 if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' || ch === '_') {
-//                     token.value += ch;
-//                     i++;
-//                 } else {
-//                     break;
-//                 }
-//             }
-//             tokens.push(token);
-//             return true
-//         }
-//     }
-
+export const lex = (ctx) => {
     
-//     while (i < src.length) {
-//         switch (true) {
-//         case space()            : break
-//         case comment()          : break
+    while (ctx.i < ctx.src.length) {
+        switch (true) {
+        case space(ctx)             : break
+        case comment(ctx)           : break
         
-//         // Keywords & Operators
-//         case KwdOrName()               : break
-//         // case match("var")       : break
-//         // case match("pub")       : break
+        // Keywords & Operators
+        // case kwdOrName()        : break
+        case match(ctx, "var")      : break
+        case match(ctx, "pub")      : break
         
-//         // Idenifiers
-//         // case name()             : break
+        // Idenifiers
+        // case name()             : break
 
-//         // Operators
-//         case match(".")         : break
-//         case match(":")         : break
-//         case match("=")         : break
+        // Operators
+        case match(ctx, ".")        : break
+        case match(ctx, ":")        : break
+        case match(ctx, ",")        : break
+        case match(ctx, "=")        : break
+        case match(ctx, "(")        : break
+        case match(ctx, ")")        : break
 
-//         // Literals
-//         case number()           : break
-//         case string()           : break
-//         case match("true")      : break
-//         case match("false")     : break
+        // Literals
+        case name(ctx)              : break
+        case number(ctx)            : break
+        case string(ctx)            : break
+
                 
-//         default                 :
-//             console.log("ERRORED! Tokens found so far: ", tokens)
-//             throw new Error(`Unexpected character '${src[i]}' at line ${line} & pos ${i}`) 
-//         }
-//     }
-//     return tokens
-// }
+        default                     :
+            console.log("ERRORED! Tokens found so far: ", ctx.tokens)
+            yell(`Unexpected character '${ctx.src[ctx.i]}' at line ${ctx.line} & pos ${ctx.i}`) 
+        }
+    }
+    return ctx.tokens
+}
