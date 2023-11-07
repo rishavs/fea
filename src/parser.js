@@ -1,20 +1,14 @@
 import { yell } from "./utils.js"
 
-export const qualifiedName = (ctx) => {
-    if (ctx.tokens[ctx.i].kind === "NAME") {
-        let qName = ctx.tokens[ctx.i]
+export const id = (ctx) => {
+    if (!ctx.tokens[ctx.i]) {
+        return false
+    }
+    if (ctx.tokens[ctx.i].kind === "NAME" ) {
+        let res = ctx.tokens[ctx.i]
+        res.kind = `LITERAL:${res.kind}`
         ctx.i += 1
-        while (true) {
-            if (ctx.tokens[ctx.i] && ctx.tokens[ctx.i].kind === "." 
-                && ctx.tokens[ctx.i + 1] && ctx.tokens[ctx.i + 1].kind === "NAME"
-            ) { 
-                qName.value += "." + ctx.tokens[ctx.i + 1].value
-                ctx.i += 2
-            } else { 
-                break 
-            }
-        }
-        return qName
+        return res
     }
     return false
 }
@@ -23,29 +17,33 @@ export const literal = (ctx) => {
     if (!ctx.tokens[ctx.i]) {
         return false
     }
-    let res
-    switch (ctx.tokens[ctx.i].kind) {
-        case "INT": case "FLOAT": case "STRING":
-            res = ctx.tokens[ctx.i]
-            res.kind = `LITERAL:${res.kind}`
-            ctx.i += 1
-            return res
-        case "NAME":
-            res = qualifiedName(ctx)
-            return res
-        default:
-            return false
+    if (ctx.tokens[ctx.i].kind === "INT"    || 
+        ctx.tokens[ctx.i].kind === "FLOAT"  || 
+        ctx.tokens[ctx.i].kind === "STRING"
+    ) {
+        let res = ctx.tokens[ctx.i]
+        res.kind = `LITERAL:${res.kind}`
+        ctx.i += 1
+        return res
     }
+    return false
 }
 
 export const expression = (ctx) => {
+    let res = id(ctx) || literal(ctx)
+    ctx.nodes.push(res)
+    return res
+}
+export const expressionChain = (ctx) => {
     let res = literal(ctx)
+    ctx.nodes.push(res)
     return res
 }
 
 export const expressionsList = (ctx) => {
     let primaryExpr = expression(ctx)
     if (!primaryExpr) {
+        console.log("NO PRIMARY EXPR")
         return false
     }
 
@@ -68,13 +66,16 @@ export const expressionsList = (ctx) => {
 }
 
 export const functionCall = (ctx) => {
-    let qname = qualifiedName(ctx)
-    if (!qname) {
+    let bk = ctx.i
+    let name = ctx.tokens[ctx.i].kind === "NAME"
+    if (!name) {
         return false
     }
+    ctx.i += 1
     
     let lparen = ctx.tokens[ctx.i].kind === "("
     if (!lparen) {
+        ctx.i = bk
         return false
     }
     ctx.i += 1
@@ -90,42 +91,54 @@ export const functionCall = (ctx) => {
         yell("Expected ')' at line " + ctx.tokens[ctx.i].line + " & pos " + ctx.tokens[ctx.i].i + ". Instead got " + ctx.tokens[ctx.i].kind)
     }
     ctx.i += 1
-
-    return {kind: "FUNC_CALL", id: qname.value, i:qname.i, line: qname.line, providedType: "Nothing", isStatement: true, children: exprList}
+    
+    return {kind: "FUNC_CALL", id: name.value, i:name.i, line: name.line, providedType: "Nothing", isStatement: true, children: exprList}
 }
 
-export const statement = (ctx) => {
+export const statement = (ctx, parentNodeId) => {
     let res
     if (!ctx.tokens[ctx.i]) {
         return false
     }
     switch (ctx.tokens[ctx.i].kind) {
         case "NAME":
-            res = functionCall(ctx)
-            if (res) { return res } else { break }
+            console.log("FOUND NAME: ", ctx.tokens[ctx.i])
+            res = functionCall(ctx, parentNodeId)
+            if (res) { 
+                console.log("FUNC CALL: ", res)
+                return res
+            }
         default:
             yell("Expected statement at line " + ctx.tokens[ctx.i].line + " & pos " + ctx.tokens[ctx.i].i + ". Instead got " + ctx.tokens[ctx.i].kind)
     }
+    return false
 
 }
 
-// A block is a list of statements
-export const scopeblock = (ctx) => {
-    let res = statement(ctx)
-    return res
-}
+// A block is a list of statements with their own scope
+// export const scopeblock = (ctx) => {
+//     let res = statement(ctx)
+//     return res
+// }
 
 // A program is also a list of statements + import statements + top level declarations
 export const program = (ctx) => {
+    let currNodeId = 0
+    ctx.nodes[currNodeId] = {kind: "PROGRAM", name: "TODO"}
+
     let stmtList = []
     let stmt
     while (true) {
-        stmt = statement(ctx)
+        stmt = statement(ctx, currNodeId)
         if (!stmt) {
             break
         }
+
         stmtList.push(stmt)
+        console.log("STMT: ", stmt)
     }
+    if (stmtList.length === 0) {
+        yell("No valid statement was found in the program!")}
     return {kind: "PROGRAM", name: "TODO", children: stmtList}
 }
 

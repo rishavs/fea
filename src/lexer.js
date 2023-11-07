@@ -132,24 +132,86 @@ const number = (ctx) => {
     return false
 }
 
+// Fully qualified name
 const name = (ctx) => {
+    let token = {kind: "NAME", value: "", i: ctx.i, line: ctx.line}
+
     let ch = ctx.src[ctx.i]
     if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
-        let token = {kind: "NAME", value: "", i: ctx.i, line: ctx.line}
         while (ctx.i < ctx.src.length) {
             ch = ctx.src[ctx.i];
-            if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+            if (
+                (ch >= 'a' && ch <= 'z') || 
+                (ch >= 'A' && ch <= 'Z') || 
+                (ch >= '0' && ch <= '9') ||
+                ch === '_' 
+            ) {
                 token.value += ch;
                 ctx.i++;
+            } else if (ch === '.') {
+                let nxt = ctx.src[ctx.i + 1]
+                if (nxt && nxt >= 'a' && nxt <= 'z') {
+                    token.value += ch;
+                    ctx.i++;
+                } else {
+                    break
+                }
+            } else if (ch === ' ' || ch === '\t' || ch === '\r') {
+                ctx.i++;
+            } else if (ch === '\n') {
+                ctx.i++;
+                ctx.line++;
             } else {
                 break;
             }
+        }
+        // if name ends in a ".", roll back 1 char
+        if (token.value.endsWith(".")) {
+            token.value = token.value.slice(0, -1)
+            ctx.i -= 1
         }
         ctx.tokens.push(token);
         return true
     }
     return false
 }
+
+// const name = (ctx) => {
+//     let ch = ctx.src[ctx.i]
+//     if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+//         let token = {kind: "NAME", value: "", i: ctx.i, line: ctx.line}
+//         while (ctx.i < ctx.src.length) {
+//             ch = ctx.src[ctx.i];
+//             if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+//                 token.value += ch;
+//                 ctx.i++;
+//             } else {
+//                 break;
+//             }
+//         }
+//         ctx.tokens.push(token);
+//         return true
+//     }
+//     return false
+// }
+// const name = (ctx) => {
+//     let ch = ctx.src[ctx.i]
+//     if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+//         let token = {kind: "NAME", value: "", i: ctx.i, line: ctx.line}
+//         while (ctx.i < ctx.src.length) {
+//             ch = ctx.src[ctx.i];
+//             if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+//                 token.value += ch;
+//                 ctx.i++;
+//             } else {
+//                 break;
+//             }
+//         }
+//         ctx.tokens.push(token);
+//         return true
+//     }
+//     return false
+// }
 
 
 

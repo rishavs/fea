@@ -1,8 +1,12 @@
 import { lex } from './lexer.js'
 import { parse } from './parser.js'
+import { syntaxChecker } from './syntaxChecker.js'
+import { pp } from './utils.js'
+
 let lexerCtx = {
-    src: `a.b.c.d ( 2 , "xxx")
-    run (2)`,
+    src: `x .y12.s__ab  
+    .t  ( 2
+        )`,
     i: 0,
     line: 1,
     tokens: [],
@@ -12,32 +16,20 @@ let tokens = lex(lexerCtx)
 console.log("SRC: ", lexerCtx.src)
 console.log("TOKENS: ", tokens)
 
+// let checkedOutput = syntaxChecker(tokens)
+// console.log("CHECKED OP: ", checkedOutput)
+
 let parserCtx = {
     tokens: tokens,
     i: 0,
+    currNodeId: 0,
+    nodes: [],
+    ast: [],
 }
 
 let tree = parse (parserCtx)
-// console.log("AST: ", JSON.stringify(tree, null, 2)) 
-console.log( pp(tree))
+console.log("AST: ", JSON.stringify(tree, null, 2)) 
+// console.log( pp(tree))
 
-function pp(ast, depth = 0) {
-    let out = ""
-    const prefix = '   '.repeat(depth) + '|--'
-    out += prefix + ast.kind
+console.log("Parse Stack: ", parserCtx.nodes)
 
-    // iterate over the properties and add to out
-    for (const [key, value] of Object.entries(ast)) {
-        if (key != 'children' && key != 'kind' && key != 'i' && key != 'line') {
-            out += ` | ${key}: ${value}`
-        }
-    }
-    out += `\n`
-
-    if (ast.children) {
-        for (const child of ast.children) {
-            out += pp(child, depth + 1);
-        }
-    }
-    return out
-}

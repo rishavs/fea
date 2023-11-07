@@ -1,12 +1,2 @@
-var a = 10 😊
-var b = 10.23
-const c = true
-
-define T1 = Array <Int | String>
-define T2 = Fun () {}
-define T2 = Object {
-
-}
-define T4 = Int | Bool | Null
-
-t1 : T1 = 
+x = 1
+exit (x)
