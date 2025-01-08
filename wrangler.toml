@@ -1,13 +1,20 @@
 #:schema node_modules/wrangler/config-schema.json
 name = "fea"
-main = "src/index.ts"
+main = "src/server.ts"
 compatibility_date = "2024-12-30"
+
+[vars]
 
 # Workers Logs
 # Docs: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
 # Configuration: https://developers.cloudflare.com/workers/observability/logs/workers-logs/#enable-workers-logs
 [observability]
 enabled = true
+
+[assets]
+directory = "./pub/"
+binding = "ASSETS"
+# experimental_serve_directly = false
 
 # Automatically place your workloads in an optimal location to minimize latency.
 # If you are running back-end logic in a Worker, running it closer to your back-end infrastructure
