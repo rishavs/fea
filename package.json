@@ -1,12 +1,16 @@
 {
-  "name": "paco",
-  "version": "1.0.0",
-  "description": "",
-  "main": "paco.js",
-  "type": "module",
+  "name": "fea",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "cf-typegen": "wrangler types"
   },
-  "author": "",
-  "license": "ISC"
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241230.0",
+    "typescript": "^5.5.2",
+    "wrangler": "^3.60.3"
+  }
 }
