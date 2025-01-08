@@ -58,7 +58,7 @@ export default {
 
 		// We call the `sayHello()` RPC method on the stub to invoke the method on the remote
 		// Durable Object instance
-		let greeting = await stub.sayHello("YOYOYO MAMA");
+		let greeting = await stub.sayHello("YOYOYO MAMA DIS WORLD");
 
 		return new Response(greeting);
 	},
