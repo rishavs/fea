@@ -1,6 +1,6 @@
 import { NewPostSchema, PostCategories } from "../../../pub/sharedDefs";
 import { Context, Page } from "../../defs";
-import { buildHTML } from "../../views/buildHTML";
+import { buildPage } from "../../views/buildPage";
 
 export const showNewPost = async (ctx: Context): Promise<Response> => {
     let page = {} as Page
@@ -111,5 +111,5 @@ export const showNewPost = async (ctx: Context): Promise<Response> => {
                 
     </article>
     `
-    return new Response(buildHTML(page), { headers: ctx.res.headers });
+    return new Response(buildPage(page), { headers: ctx.res.headers });
 }

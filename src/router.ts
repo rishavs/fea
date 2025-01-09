@@ -15,6 +15,7 @@ import { PostCategories } from "../pub/sharedDefs";
 import { showUserDetails } from "./handlers/pages/showUserDetails";
 import { updateUserDetails } from "./handlers/apis/updateUserDetails";
 import { saveNewPost } from "./handlers/apis/saveNewPost";
+import { buildPage } from "./views/buildPage";
 
 const setPath = (str: string) => {
     return new URLPattern({ pathname: str }) 
@@ -115,7 +116,7 @@ export const route = async (request: Request, env: Env) => {
             content: '',
             error: serverError,
         }
-        return new Response(buildHTML(page), { status: serverError.code, headers: ctx.res.headers });
+        return new Response(buildPage(page), { status: serverError.code, headers: ctx.res.headers });
         // Default response if no pattern matches
     }
 };

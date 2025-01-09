@@ -1,6 +1,6 @@
 
 import { Context, Page } from "../../defs";
-import { buildHTML } from "../../views/buildHTML";
+import { buildPage } from "../../views/buildPage";
 
 
 export const showUserDetails = async (ctx: Context): Promise<Response> => {
@@ -12,5 +12,5 @@ export const showUserDetails = async (ctx: Context): Promise<Response> => {
         content: `<h1>Page is ${cat}. Viewing user details for ${ ctx.req.params.slug}</h1>`,
         error: null
     }
-    return new Response(buildHTML(page), { headers: ctx.res.headers });
+    return new Response(buildPage(page), { headers: ctx.res.headers });
 }
