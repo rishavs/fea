@@ -22,10 +22,11 @@ export const signinToGoogle = async (ctx: Context) : Promise<Response> => {
     // ------------------------------------------
     // Generate state token & nonce. Add to session cookie
     // ------------------------------------------
+    // TODO - create a new session. add these details to the session
     ctx.res.headers.append('Set-Cookie', `D_SECTOK=${secToken}; path=/; SameSite=Strict;`)
     ctx.res.headers.append('Set-Cookie', `D_NONCE=${nonce}; path=/; SameSite=Strict;`)
     
     // set window location
-    ctx.res.headers.append('Location', OauthURL)
+    ctx.res.headers.append('Location', encodeURI(OauthURL))
     return new Response('', {headers: ctx.res.headers, status: 302})
 }
