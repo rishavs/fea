@@ -5,9 +5,9 @@ import { NewPostTypes, PostCategories, UserPronouns } from "../pub/sharedDefs";
 // App Settings
 // ---------------------------------------
 export const Settings = {
+    newSessionAge: 60 * 5, // 5 minutes
     maxSessionAge : 60 * 60 * 24 * 30 // 30 days
 }
-
 
 // ---------------------------------------
 // Server Errors
@@ -17,8 +17,9 @@ export class ServerError extends Error {
     details: string;
     internal: string;
     code: number;
+    redirect?: string;
 
-    constructor(code: 400 | 401 | 403 | 404 | 429 | 500 | 503 , details?: string, internal?: string) {
+    constructor(code: 400 | 401 | 403 | 404 | 429 | 500 | 503 , details?: string, internal?: string, redirect?: string) {
         let errorHeader = "Internal Server Error"
 
         switch (code) {
@@ -37,6 +38,7 @@ export class ServerError extends Error {
         this.header = errorHeader;
         this.details = details ? details : errorHeader;
         this.internal = internal ? internal : errorHeader;
+        this.redirect = redirect;
 
         this.name = "Server Error " + this.code 
 

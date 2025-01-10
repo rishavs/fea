@@ -1,8 +1,5 @@
 import { NewPostSchema, UserControlsSchema } from './sharedDefs.js'
 
-document.cookie = "TEST_COOKIE=ATE_IT; path=/;";
-
-
 // ---------------------------------------
 // Helpers
 // ---------------------------------------
@@ -23,6 +20,7 @@ const showErrorCard = async (code, header, details) => {
 // Auth
 // ---------------------------------------    
 if (cookieExists("D_SYNC_USER")) {
+    console.log("User Sync Triggered")
     // parse the user object from the cookie & add each attribute into local storage
     let user = JSON.parse(decodeURIComponent(
         document.cookie.split("D_SYNC_USER=")[1].split(";")[0]

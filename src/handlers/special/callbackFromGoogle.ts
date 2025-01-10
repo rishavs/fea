@@ -10,50 +10,71 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     // Read Query Params
     // ------------------------------------------
     let searchParams = new URLSearchParams(ctx.req.url.search)
-    let cookies = parseCookies(ctx.req.raw.headers.get('Cookie') || "")
 
-    let prevURL = ctx.req.raw.headers.get("Referer")
-    console.log(prevURL)
+    let genericErrorMsg = "Unable to signin using the Google account. Please delete all cookies and try again."
+    
 
     // console.log("Search Params", searchParams)
     let code = searchParams.get("code")
-    let state = searchParams.get("state")
     if (!code) {
-        throw new ServerError(503, "Unable to signin using the Google account. Please relogin to Google and try again.", "No signin code returned from Google")
+        throw new ServerError(503, genericErrorMsg, "No signin code returned from Google")
     }
+    let state = searchParams.get("state")
     if (!state) {
-        throw new ServerError(503, "Unable to signin using the Google account. Please relogin to Google and try again.", "No signin state returned from Google")
+        throw new ServerError(503, genericErrorMsg, "No signin state returned from Google")
     }
-    let secToken = JSON.parse(state || "").state
-    if (!secToken) {
-        throw new ServerError(503, "Unable to signin using the Google account. Please relogin to Google and try again.", "No security token returned from Google")
+    let sid = JSON.parse(state).sid
+    if (!sid) {
+        throw new ServerError(503, genericErrorMsg, "No sid value returned from Google")
     }
-    let redirect = JSON.parse(state || "/").redirect
+    let secTokenFromGoogle = JSON.parse(state || "").sec_token
+    if (!secTokenFromGoogle) {
+        throw new ServerError(503, genericErrorMsg, "No sec token value returned from Google")
+    }
+
+    let redirect = JSON.parse(state).redirect  || "/"
+    let prevURL = ctx.req.raw.headers.get("Referer")
+    console.log(prevURL)
 
     // ------------------------------------------
-    // Read the sec token & nonce from the cookies
+    // Read the sec token & nonce from the db for the given session id
     // ------------------------------------------
-    let secTokenCookie = cookies.D_SECTOK
-    let nonceCookie = cookies.D_NONCE
-    if (!secTokenCookie) {
-        throw new ServerError(503, "Unable to signin using the Google account. Please relogin to Google and try again.", "No security token found in the cookies")
+    // TODO - destroy session if it is more than n minutes old. Likely a sign of abuse
+
+    let sessionDetailsFromDB = await ctx.db.from('sessions')
+    .select('sec_token,nonce,created_at')
+    .eq('id', sid)
+    .limit(1)
+    .maybeSingle()
+
+    if (sessionDetailsFromDB.error) {
+        throw new ServerError(503, genericErrorMsg, JSON.stringify(sessionDetailsFromDB.error))
     }
-    if (!nonceCookie) {
-        throw new ServerError(503, "Unable to signin using the Google account. Please relogin to Google and try again.", "No nonce found in the cookies")        
+    if (!sessionDetailsFromDB.data?.sec_token || !sessionDetailsFromDB.data?.nonce) {
+        throw new ServerError(503, genericErrorMsg, "No sec token or nonce found in the database")
     }
+
+    // if the session is older than 5 minutes, throw an error
+    if (sessionDetailsFromDB.data?.created_at < new Date(Date.now() - Settings.newSessionAge).toISOString()) {
+        throw new ServerError(503, genericErrorMsg, "The session has expired")
+    }
+
+    let secTokenFromDB = sessionDetailsFromDB.data.sec_token as string
+    let nonceFromDB = sessionDetailsFromDB.data.nonce as string
+
     // console.log("Cookies", secTokenCookie, nonceCookie)
     // ------------------------------------------
     // Verify the Security Token
     // ------------------------------------------
-    if (secToken != secTokenCookie) {
-        throw new ServerError(503, "Unable to signin using the Google account. Please relogin to Google and try again.", "The security tokens do not match")
+    if (secTokenFromDB != secTokenFromGoogle) {
+        throw new ServerError(503, genericErrorMsg, "The security tokens do not match")
     }
 
     // ------------------------------------------
     // Get ID Token
     // ------------------------------------------
     let tokenReqBody = new URLSearchParams({
-        code: code || "", // Ensure code is always a string
+        code: code,
         client_id: ctx.env.GOOGLE_CLIENT_ID,
         client_secret: ctx.env.GOOGLE_CLIENT_SECRET,
         redirect_uri: ctx.req.url.origin + "/callback/google",
@@ -71,16 +92,15 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     })
 
     if (!tokenResponse.ok) {
-        let errorResponse = await tokenResponse.text(); // or .json() if the response is JSON
-        throw new ServerError(503, "Unable to signin using the Google account. Please relogin to Google and try again.", 'Error in fetching id token: ' + errorResponse)
+        let errorResponse = await tokenResponse.text(); 
+        throw new ServerError(503, genericErrorMsg, 'Error in fetching id token: ' + errorResponse)
     } 
 
     let tokenData: any = await tokenResponse.json();
-    // console.log("Token Data", tokenData);
     
     let idToken = tokenData.id_token
     if (!idToken) {
-        throw new ServerError(503, "Unable to signin using the Google account. Please relogin to Google and try again.", 'No id token was returned from Google')
+        throw new ServerError(503, genericErrorMsg, 'No id token was returned from Google')
     }
 
     const JWKS = createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'))
@@ -92,13 +112,12 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     // ------------------------------------------
     // Validate Nonce
     // ------------------------------------------
-    let nonce = payload.nonce
-    if (!nonce) {
-        throw new ServerError(503, "Unable to signin using the Google account. Please relogin to Google and try again.", 'Nonce was not found in the Google payload')
+    let nonceFromToken = payload.nonce
+    if (!nonceFromToken) {
+        throw new ServerError(503, genericErrorMsg, 'Nonce was not found in the Google payload')
     }
-    if (nonce != nonceCookie) {
-        throw new ServerError(503, "Unable to signin using the Google account. Please relogin to Google and try again.", 'The Nonce values do not match')
-
+    if (nonceFromToken != nonceFromDB) {
+        throw new ServerError(503, genericErrorMsg, 'The Nonce values do not match')
     }
 
     // ------------------------------------------
@@ -108,13 +127,16 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     let doesUserExistsInDb = await ctx.db.from('users')
         .select('*')
         .eq('google_id', payload.email)
+        .limit(1)
+        .maybeSingle()
 
     if (doesUserExistsInDb.error) {
         throw new ServerError(500, "Unable to signin. Please try again later", JSON.stringify(doesUserExistsInDb.error))
     }
     console.log("doesUserExistsInDb", doesUserExistsInDb.data)
 
-    if (doesUserExistsInDb.data.length == 0) {
+    let isNewUser = false
+    if (doesUserExistsInDb.data == null) {
         // let uid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 64)()
 
         console.log(`user doesn't exist`)
@@ -151,12 +173,12 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
         console.log("Add User to DB", addUserToDB)
         user.id = addUserToDB.data[0].id
 
-        // Trigger FRE for user
-        ctx.res.headers.append('Set-Cookie', `D_FRE=true; path=/; SameSite=Strict;`)
+        // set the flag for new user
+        isNewUser = true
 
     } else {
         console.log(`user exists`)
-        user = doesUserExistsInDb.data[0]
+        user = doesUserExistsInDb.data as User
     }
 
     // ------------------------------------------
@@ -164,35 +186,25 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     // ------------------------------------------
     // TODO add navigator data to session. 
 
-    // Create new POST api to send this info at session start
-    // try {
-    //     await env.BINDING_NAME.put("KEY", "VALUE");
-    //     const value = await env.BINDING_NAME.get("KEY");
-    //     if (value === null) {
-    //       return new Response("Value not found", { status: 404 });
-    //     }
-    //     return new Response(value);
-    // } catch (err) {
-    //     // In a production application, you could instead choose to retry your KV
-    //     // read or fall back to a default code path.
-    //     console.error(`KV returned error: ${err}`);
-    //     return new Response(err, { status: 500 });
-    // }
 
     let userAgent = ctx.req.raw.headers.get('User-Agent') || ""
-    const addNewSession = await ctx.db.from('sessions').insert({
-        id: customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 32)(),
-            user_id: user.id,
-            user_agent: userAgent,
-        }).select()
-        
-    if (addNewSession.error) {
-        throw new ServerError(503, "Unable to signin. Please try again later", JSON.stringify(addNewSession.error))
-    }
-    console.log (`session created in db: ${JSON.stringify(addNewSession.data)}`)
+    const updateSession = await ctx.db.from('sessions')
+    .update({ 
+        user_id     : user.id, 
+        user_agent  : userAgent,
+        initiated_at: new Date().toISOString(),
+    })
+    .eq('id', sid)
+    .select()
 
-    let maxAge = Settings.maxSessionAge // One year in seconds
-    ctx.res.headers.append('Set-Cookie', `D_SID=${addNewSession.data[0].id}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=Strict;`);
+    if (updateSession.error) {
+        console.error("Error in updating session", updateSession.error)
+        throw new ServerError(503, "Unable to signin. Please try again later", JSON.stringify(updateSession.error))
+    }
+    console.log (`session updated in db: ${JSON.stringify(updateSession.data)}`)
+
+    ctx.res.headers.append('Set-Cookie', 
+        `D_SID=${updateSession.data[0].id}; Max-Age=${Settings.maxSessionAge}; path=/; HttpOnly; Secure; SameSite=Strict;`);
 
     // ------------------------------------------
     // Sync the user details with the browser
@@ -204,11 +216,13 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
 
     // send the user object in the cookie
     let userEncoded = encodeURIComponent(JSON.stringify(user))
-    ctx.res.headers.append('Set-Cookie', `D_SYNC_USER=${userEncoded}; path=/; SameSite=Strict;`)
+    ctx.res.headers.append('Set-Cookie', 
+        `D_SYNC_USER=${userEncoded}; path=/; Secure; SameSite=Strict;`)
 
     // ------------------------------------------
     // Redirect to the original page
     // ------------------------------------------
+
     ctx.res.headers.append('Location', redirect)
     return new Response ('', {status: 302, headers: ctx.res.headers})
 }

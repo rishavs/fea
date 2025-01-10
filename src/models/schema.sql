@@ -32,18 +32,24 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS sessions ( 
     id            text PRIMARY KEY, -- Stronger bits as this is public
     user_id       uuid REFERENCES "users", -- Nullable for anonymous sessions
+    
+    sec_token     text NOT NULL, -- for establishing oauth session
+    nonce         text NOT NULL, -- for establishing oauth session
+
     user_agent    text,
     brands        text, -- from navigator api
     is_mobile     BOOLEAN,  -- from navigator api
     platform      text,  -- from navigator api
+
     created_at    timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    initiated_at  timestamp, -- when the session was initiated
     deleted_at    timestamp
 );
 
 INSERT INTO users 
 (google_id, slug, name, thumb, pronouns, honorific, flair, role, level)
 VALUES 
-('eva@gmail.com', 'eva-green', 'Eva Green', 'https://hyszdrccjghkiiasipsr.supabase.co/storage/v1/object/public/avatars/default.jpg', 'She/Her', 'Divine Majesty', 'Empress of Humanity', 'user', 'leaf')
+('eva@gmail.com', 'eva-green', 'Eva Green', 'https://hyszdrccjghkiiasipsr.supabase.co/storage/v1/object/public/avatars/default.jpg', 'She/Her', 'Divine Majesty', 'Empress of Humanity', 'user', 'leaf'),
 ('monica@gmail.com', 'monica-bellucci', 'Monica Anna Maria Bellucci', 'https://hyszdrccjghkiiasipsr.supabase.co/storage/v1/object/public/avatars/default.jpg', 'She/Her', 'Holy Mother', 'Holy Mother of Humanity of Humanity', 'user', 'leaf')
 
 CREATE TABLE IF NOT EXISTS posts ( 

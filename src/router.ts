@@ -117,6 +117,7 @@ export const route = async (request: Request, env: Env) => {
             error: serverError,
         }
         return new Response(buildPage(page), { status: serverError.code, headers: ctx.res.headers });
-        // Default response if no pattern matches
+        // TODO - for errors in the special routes, we need to redirect to home intstead of showing the current page
+        // as these routes do not have a page underneath
     }
 };

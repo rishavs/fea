@@ -7,6 +7,7 @@ export const signout = async (ctx: Context): Promise<Response> => {
     
     if (!cookies.D_SID) {
         console.error(new ServerError(503, '', "The session cookie wasn't found"))
+        return Response.redirect('/', 302)
     }
 
     let resCloseSession = await ctx.db.from('sessions')
