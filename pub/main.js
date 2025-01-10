@@ -139,111 +139,114 @@ window.addEventListener("storage", (event) => {
 // // ---------------------------------------
 // // FRE Modal
 // // ---------------------------------------    
-// let fre_modal = document.getElementById('fre_modal');
+let fre_modal = document.getElementById('fre_modal');
 
-// // Hydrate form
-// user_name_input.value = localStorage.getItem('name') || "";
-// user_name_input_char_count.innerText = user_name_input.value.length + "/" + UserControlsSchema.nameMaxLength + "chars";
-// user_pronouns_select.value = localStorage.getItem('pronouns') === 'null' ? "None" : localStorage.getItem('pronouns');
+// Hydrate form
+if (document.getElementById('user_details_form')) {
+    user_name_input.value = localStorage.getItem('name') || "";
+    user_name_input_char_count.innerText = user_name_input.value.length + "/" + UserControlsSchema.nameMaxLength + "chars";
+    user_pronouns_select.value = localStorage.getItem('pronouns') === 'null' ? "None" : localStorage.getItem('pronouns');
 
-// // Setup Interactivity
-// user_name_input.addEventListener("input", () => {
-//     user_name_input_char_count.innerText = user_name_input.value.length + "/" + UserControlsSchema.nameMaxLength + "chars"
-//     document.querySelectorAll('[data-role="user-profile-name"]').forEach((el) => {
-//         el.textContent = user_name_input.value;
-//     })
-// })
+    // Setup Interactivity
+    user_name_input.addEventListener("input", () => {
+        user_name_input_char_count.innerText = user_name_input.value.length + "/" + UserControlsSchema.nameMaxLength + "chars"
+        document.querySelectorAll('[data-role="user-profile-name"]').forEach((el) => {
+            el.textContent = user_name_input.value;
+        })
+    })
 
-// user_thumb_input.addEventListener("change", async(e) => {
-//     let file = user_thumb_input.files[0];
-//     console.log("Thumb input changed", file)
+    user_thumb_input.addEventListener("change", async(e) => {
+        let file = user_thumb_input.files[0];
+        console.log("Thumb input changed", file)
 
-//     if ( file.size < 1 ) {
-//         user_thumb_input.setCustomValidity("Image file seems corrupted. Please upload a different image");
-//         user_thumb_input.reportValidity();
-//         user_thumb_input.value = "";
-//         return;
-//     }
-//     if ( file.size > 1024 * 1024 ) {
-//         user_thumb_input.setCustomValidity("Image file size should be smaller than 1 Mb in size");
-//         user_thumb_input.reportValidity();
-//         user_thumb_input.value = "";
-//         return;
-//     }
-//     let reader = new FileReader();
-//     reader.onload = function(e) {
-//         document.querySelectorAll('[data-role="user-profile-img"]').forEach((el) => {
-//             el.src = e.target.result;
-//         })
-//     }
-//     reader.readAsDataURL(file);
-// })
+        if ( file.size < 1 ) {
+            user_thumb_input.setCustomValidity("Image file seems corrupted. Please upload a different image");
+            user_thumb_input.reportValidity();
+            user_thumb_input.value = "";
+            return;
+        }
+        if ( file.size > 1024 * 1024 ) {
+            user_thumb_input.setCustomValidity("Image file size should be smaller than 1 Mb in size");
+            user_thumb_input.reportValidity();
+            user_thumb_input.value = "";
+            return;
+        }
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            document.querySelectorAll('[data-role="user-profile-img"]').forEach((el) => {
+                el.src = e.target.result;
+            })
+        }
+        reader.readAsDataURL(file);
+    })
 
 
-// // Handle form submission
-// user_details_form.addEventListener("submit", (event) => {
-//     event.preventDefault(); // Prevent the default form submission
-//     let user_data = new FormData(user_details_form);
+    // Handle form submission
+    user_details_form.addEventListener("submit", (event) => {
+        event.preventDefault(); // Prevent the default form submission
+        let user_data = new FormData(user_details_form);
 
-//     // if the form is embedded in the dialog, close the dialog
-//     fre_modal.close();
+        // if the form is embedded in the dialog, close the dialog
+        fre_modal.close();
 
-//     // skip submission if the no data is changed
-//     if (user_data.get('name') === localStorage.getItem('name') 
-//         && user_data.get('pronouns') === localStorage.getItem('pronouns')
-//         && user_data.get('thumb').name === ""
-//     ) {
-//         console.log("No change in profile details. Skipping submission");
-//         return;
-//     }
+        // skip submission if the no data is changed
+        if (user_data.get('name') === localStorage.getItem('name') 
+            && user_data.get('pronouns') === localStorage.getItem('pronouns')
+            && user_data.get('thumb').name === ""
+        ) {
+            console.log("No change in profile details. Skipping submission");
+            return;
+        }
 
-//     // Use fetch API to submit the form
-//     fetch("/api/update-user-details", {
-//         method: "POST",
-//         body: new FormData(user_details_form),
-//     })
-//     .then(response => {
-//         if (!response.ok) {
-//             console.error('Fetch Error:', response);
-//             showErrorCard( "ERROR " + response.status, response.statusText, "Unable to update user details. Please try again later.");
-//         } else {
-//             console.log("User details updated successfully")
-//         }
-//     })
-//     .catch(error => {
-//         console.error('Fetch Error:', error);
-//         showErrorCard( "ERROR " , "Unable to update user details. Please try again later.", error);
+        // Use fetch API to submit the form
+        fetch("/api/update-user-details", {
+            method: "POST",
+            body: new FormData(user_details_form),
+        })
+        .then(response => {
+            if (!response.ok) {
+                console.error('Fetch Error:', response);
+                showErrorCard( "ERROR " + response.status, response.statusText, "Unable to update user details. Please try again later.");
+            } else {
+                console.log("User details updated successfully")
+            }
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            showErrorCard( "ERROR " , "Unable to update user details. Please try again later.", error);
 
-//     });
-// });
+        });
+    });
+
+}
 
 // // ---------------------------------------
 // // New Post page
 // // ---------------------------------------
-// document.getElementById("post_type")?.addEventListener("click", async(e) => {
-//     if (post_type.checked) {
+document.getElementById("post_type")?.addEventListener("click", async(e) => {
+    if (post_type.checked) {
 
-//         post_link_controls.classList.remove("hidden")
-//         post_link_input.required = true
-//     } else {
+        post_link_controls.classList.remove("hidden")
+        post_link_input.required = true
+    } else {
 
-//         post_link_controls.classList.add("hidden")
-//         post_link_input.required = false
-//     }
+        post_link_controls.classList.add("hidden")
+        post_link_input.required = false
+    }
 
-// })
+})
 
-// document.getElementById("post_link_input")?.addEventListener("input", async(e) => {
-//     let numOfEnteredChars = post_link_input.value.length;
-//     post_link_char_count.innerText = numOfEnteredChars + "/" + NewPostSchema.linkMaxLength + " chars";
-// })
+document.getElementById("post_link_input")?.addEventListener("input", async(e) => {
+    let numOfEnteredChars = post_link_input.value.length;
+    post_link_char_count.innerText = numOfEnteredChars + "/" + NewPostSchema.linkMaxLength + " chars";
+})
 
-// document.getElementById("post_title_input")?.addEventListener("input", async(e) => {
-//     let numOfEnteredChars = post_title_input.value.length;
-//     post_title_char_count.innerText = numOfEnteredChars + "/" + NewPostSchema.titleMaxLength + " chars";
-// })
+document.getElementById("post_title_input")?.addEventListener("input", async(e) => {
+    let numOfEnteredChars = post_title_input.value.length;
+    post_title_char_count.innerText = numOfEnteredChars + "/" + NewPostSchema.titleMaxLength + " chars";
+})
 
-// document.getElementById("post_content_textarea")?.addEventListener("input", async(e) => {
-//     let numOfEnteredChars = post_content_textarea.value.length;
-//     content_char_count.innerText = numOfEnteredChars + "/" + NewPostSchema.contentMaxLength + " chars";
-// })
+document.getElementById("post_content_textarea")?.addEventListener("input", async(e) => {
+    let numOfEnteredChars = post_content_textarea.value.length;
+    content_char_count.innerText = numOfEnteredChars + "/" + NewPostSchema.contentMaxLength + " chars";
+})

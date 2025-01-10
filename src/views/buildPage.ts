@@ -33,9 +33,7 @@ export const buildPage = (page: Page) => {
         <meta property="og:type" content="article">
         <meta property="og:title" content="">
 
-        <link href="https://cdn.jsdelivr.net/npm/daisyui@5.0.0-beta.1/daisyui.css" rel="stylesheet" type="text/css" />
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://cdn.jsdelivr.net/npm/daisyui@5.0.0-beta.1/themes.css" rel="stylesheet" type="text/css" />
+        <link href="main.css" rel="stylesheet" type="text/css" />
     </head>
 
 <body class="min-h-screen bg-base-200">
