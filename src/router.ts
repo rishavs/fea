@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { parseCookies } from "./utils";
-import { AppRoute, Context, Page } from "./defs";
-import { ServerError } from "./defs";
+import { AppRoute, Context, Page, ServerError  } from "./defs";
 import { buildHTML } from "./views/buildHTML";
 import { showHome } from "./handlers/pages/showHome";
 import { signinToGoogle } from "./handlers/special/signinToGoogle";
@@ -16,23 +15,31 @@ import { showUserDetails } from "./handlers/pages/showUserDetails";
 import { updateUserDetails } from "./handlers/apis/updateUserDetails";
 import { saveNewPost } from "./handlers/apis/saveNewPost";
 import { buildPage } from "./views/buildPage";
+import { showError } from "./handlers/pages/showError";
 
 const setPath = (str: string) => {
     return new URLPattern({ pathname: str }) 
 }
 
 const routes: AppRoute[] = [
+    // Static routes
     { method: 'GET', path: setPath('/'), allow: [], handler: showHome },
     { method: 'GET', path: setPath('/p/new'), allow: [], handler: showNewPost, },
     // { method: 'GET', path: setPath('/throw'), allow: [], handler: () => {throw new ServerError400("I threw a 400 err")}, },
 
+    // Special routes
     { method: 'GET', path: setPath(`/signin/google`), allow: [], handler: signinToGoogle,  },
     { method: 'GET', path: setPath(`/callback/google`), allow: [], handler: callbackFromGoogle, },    
     { method: 'GET', path: setPath(`/signout`), allow: [], handler: signout, },
     
+    // API routes
     { method: 'POST', path: setPath(`/api/update-user-details`), allow: ['user', 'moderator', 'admin'], handler: updateUserDetails, },
     { method: 'POST', path: setPath(`/api/save-new-post`), allow: ['user', 'moderator', 'admin'], handler: saveNewPost, },
 
+    // Dynamic error routes
+    { method: 'GET', path: setPath(`/error/:id`), allow: [], handler: showError },
+
+    // Dynamic routes
     { method: 'GET', path: setPath(`/user/:slug`), allow: [], handler: showUserDetails },
     { method: 'GET', path: setPath(`/:cat`), allow: [], handler: showPostsList },
     { method: 'GET', path: setPath(`/:cat/:id`), allow: [], handler: showPostDetails },
@@ -88,7 +95,7 @@ export const route = async (request: Request, env: Env) => {
                 if (ctx.req.params.cat && 
                     !Object.keys(PostCategories).includes(ctx.req.params.cat)
                 ) {
-                    throw new ServerError(404, 'The page you are looking for is in another castle')
+                    throw new ServerError("PageNotFound", "Error 404: Invalid Category: " + ctx.req.params.cat)
                 }
                 // Auth check + Role based access control
                 if (allow.length > 0 ) await getUserFromSession(ctx, {method, path, allow, handler});
@@ -96,28 +103,32 @@ export const route = async (request: Request, env: Env) => {
                 return await handler(ctx);
             } 
         }
-        throw new ServerError(404, 'The page you are looking for, is in another castle')
-
+        throw new ServerError("PageNotFound", "Error 404: " + url.pathname)
     } catch (err) {
+        console.error("Error: ", err);
+
         let serverError: ServerError;
         if (err instanceof ServerError) {
             serverError = err;
         } else {
-            serverError = new ServerError(500, "Oh no! The server just shattered into a million pieces. But don't worry. We have our best hamsters on the job ", (err as Error).message)
+            serverError = new ServerError("InternalServerError", "Error 500: " + (err as Error).message)
         }
-        console.error("Server Error: ", serverError);
         
         if (url.pathname.startsWith("/api")) {
-            return new Response(JSON.stringify({ error: serverError.details }), { status: serverError.code, headers: ctx.res.headers });
+            return new Response(JSON.stringify({ error: serverError.userMsg }), { status: serverError.code, headers: ctx.res.headers });
         }
 
+        // For errors without a dedicated page, redirect to the error page
+        if (serverError.toErrorPage) {
+            return Response.redirect (`/error/${serverError.header}`, 303);
+        }
+
+        // Else, render the error page in situ
         let page: Page = {
             title: serverError.header,
             content: '',
             error: serverError,
-        }
+        }        
         return new Response(buildPage(page), { status: serverError.code, headers: ctx.res.headers });
-        // TODO - for errors in the special routes, we need to redirect to home intstead of showing the current page
-        // as these routes do not have a page underneath
     }
 };

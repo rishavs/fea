@@ -37,17 +37,17 @@ export const saveNewPost = async (ctx: Context): Promise<Response> => {
 
      // Validate form data
      if (!postTitle || postTitle.length < NewPostSchema.titleMinLength || postTitle.length > NewPostSchema.titleMaxLength) {
-        throw new ServerError(400, '', "Invalid post title");
+        throw new ServerError(400, "Invalid post title");
     }
 
     if (!postContent || postContent.length < NewPostSchema.contentMinLength || postContent.length > NewPostSchema.contentMaxLength) {
-        throw new ServerError(400, '', "Invalid post content");
+        throw new ServerError(400, "Invalid post content");
     }
 
     if (postIsLink) {
         let _ = new URL(postLink)
         if (!postLink || postLink.length < NewPostSchema.linkMinLength || postLink.length > NewPostSchema.linkMaxLength) {
-            throw new ServerError(400, '', "Invalid post link url");
+            throw new ServerError(400, "Invalid post link url");
         }
     }
 

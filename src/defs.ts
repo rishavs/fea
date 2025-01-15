@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NewPostTypes, PostCategories, UserPronouns } from "../pub/sharedDefs";
+import { header } from "./views/header";
 
 // ---------------------------------------
 // App Settings
@@ -12,36 +13,72 @@ export const Settings = {
 // ---------------------------------------
 // Server Errors
 // ---------------------------------------
+
+// ---------------------------------------
+// Server Messages/Triggers
+// ---------------------------------------
+export const ServerErrorMessages = {
+    InvalidSession: {
+        code: 401,
+        header: "Invalid Session",
+        userMsg: "Unable to login. Please delete all cookies and try again"
+    },
+    GoogleAuthError: {
+        code: 503,
+        header: "Google Auth Error",
+        userMsg: "Unable to signin using the Google account. Please delete all cookies and try again later"
+    },
+    InvalidRequestData: {
+        code: 400,
+        header: "Invalid Request Data",
+        userMsg: "Please check the form data and try again"
+    },
+    UnauthorizedAccess: {
+        code: 401,
+        header: "Unauthorized Access",
+        userMsg: "Access to this resource is not allowed"
+    },
+    PageNotFound: {
+        code: 404,
+        header: "Page Not Found",
+        userMsg: "The page you are looking for is in another castle"
+    },
+    InternalServerError: {
+        code: 500,
+        header: "Internal Server Error",
+        userMsg: `Oh no! You just broke the internets! <br> But don't worry. We have our best hamsters on the job`
+    },
+    ServiceUnavailable: {
+        code: 503,
+        header: "Service Unavailable",
+        userMsg: "Service is currently unavailable. Please try again later"
+    },
+    TooManyRequests: {
+        code: 429,
+        header: "Too Many Requests",
+        userMsg: "Too many requests. Please try again later"
+    }
+} as const;
+export type ServerErrorHeaderType = keyof typeof ServerErrorMessages;
 export class ServerError extends Error {
-    header: string;
-    details: string;
-    internal: string;
-    code: number;
-    redirect?: string;
+    code        : number;
+    header      : string;
+    userMsg     : string;
+    toErrorPage : boolean;
 
-    constructor(code: 400 | 401 | 403 | 404 | 429 | 500 | 503 , details?: string, internal?: string, redirect?: string) {
-        let errorHeader = "Internal Server Error"
+    constructor(
+        header          : ServerErrorHeaderType,
+        msg             : string, 
+        toErrorPage?    : boolean
+    ) {
+        super(msg); // error details is stored in the message property
+        this.header         = ServerErrorMessages[header].header;
+        this.code           = ServerErrorMessages[header].code;
+        this.userMsg        = ServerErrorMessages[header].userMsg;
 
-        switch (code) {
-            case 400: errorHeader = "Bad Request"; break;
-            case 401: errorHeader = "Unauthorized Access"; break;
-            case 403: errorHeader = "Access Forbidden"; break;
-            case 404: errorHeader = "Page Not Found"; break;
-            case 429: errorHeader = "Too Many Requests"; break;
-            case 500: errorHeader = "Internal Server Error"; break;
-            case 503: errorHeader = "Service Unavailable"; break;
-        }
+        this.toErrorPage    = toErrorPage ? toErrorPage : false;
 
-        super(errorHeader);
-        
-        this.code = code;
-        this.header = errorHeader;
-        this.details = details ? details : errorHeader;
-        this.internal = internal ? internal : errorHeader;
-        this.redirect = redirect;
-
-        this.name = "Server Error " + this.code 
-
+        this.name = "Server Error " + this.code + ": " + this.header;
     }
 }
 

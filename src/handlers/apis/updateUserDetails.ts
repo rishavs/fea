@@ -31,14 +31,14 @@ export const updateUserDetails = async (ctx: Context): Promise<Response> => {
     ) {
         ctx.req.user!.name = name;
     } else {
-        throw new ServerError(400,'', "User name doesn't meets the schema requirements");
+        throw new ServerError(400,"User name doesn't meets the schema requirements");
     }
 
     // Validate pronouns
     if (Object.values(UserPronouns).includes(pronouns)) {
         ctx.req.user!.pronouns = pronouns;
     } else {
-        throw new ServerError(400, '', "User pronouns doesn't meets the schema requirements");
+        throw new ServerError(400, "User pronouns doesn't meets the schema requirements");
     }
 
   
@@ -72,7 +72,7 @@ export const updateUserDetails = async (ctx: Context): Promise<Response> => {
             // let imgUrl = CFRespData.result.variants.find( (v: string) => v.endsWith('userthumb'));
             ctx.req.user!.thumb = CFRespData.data.publicUrl;
         } else {
-            throw new ServerError(400, '', "User thumb doesn't meets the schema requirements");
+            throw new ServerError(400, "User thumb doesn't meets the schema requirements");
         }
     }
 

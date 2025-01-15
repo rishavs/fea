@@ -33,7 +33,7 @@ export const buildPage = (page: Page) => {
         <meta property="og:type" content="article">
         <meta property="og:title" content="">
 
-        <link href="main.css" rel="stylesheet" type="text/css" />
+        <link href="/main.css" rel="stylesheet" type="text/css" />
     </head>
 
 <body class="min-h-screen bg-base-200">
@@ -50,8 +50,8 @@ export const buildPage = (page: Page) => {
                     <!-- Page content here -->
 
                     <!-----------------------
-                            Header Content
-                            ------------------------>
+                    Header Content
+                    ------------------------>
                     <header id="header_container" class="navbar sticky top-0 bg-info opacity-90 rounded-b-box lg:rounded-box border border-base-300 shadow-lg h-8 lg:h-20 z-10 px-4 lg:px-8">
                         ${header()}
                     </header>
@@ -59,8 +59,8 @@ export const buildPage = (page: Page) => {
                     <div id="sticky_container" class="sticky top-0"> </div>
 
                     <!-----------------------
-                            Noscript Content
-                            ------------------------>
+                    Noscript Content
+                    ------------------------>
                     <noscript>
                         <article class="prose lg:prose-lg text-center pt-16">
                             <h1>Error: Javascript is disabled.</h1>
@@ -76,15 +76,15 @@ export const buildPage = (page: Page) => {
                     </noscript>
 
                     <!-----------------------
-                            Error View container
-                            ------------------------>
+                    Error View container
+                    ------------------------>
                     <div id="error_container" class="${
 											page.error ? '' : 'hidden'
 										}"> ${errorCard(page.error)} </div>
 
                     <!-----------------------
-                            Main Page Content
-                            ------------------------>
+                    Main Page Content
+                    ------------------------>
                     <main id="main_container" class="contents"> ${page.content} </main>
 
 
@@ -104,6 +104,14 @@ export const buildPage = (page: Page) => {
             ${drawer()}
         </div>
     </div>
+
+    <div id="modals_container">
+        ${freModal()}
+    </div>
+    <div id="toasts_container" class="toast toast-top toast-end mt-16 z-100">
+    </div>
+    <div id="floaters_container"></div>
+
 
     <script src="/main.js" type="module"></script>
 

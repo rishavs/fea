@@ -4,3 +4,4 @@
     exclude: rootscrollgutter;
 }
 @plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/forms";

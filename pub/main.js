@@ -41,19 +41,13 @@ if (cookieExists("D_FRE")) {
     // open fre modal
     let freModal = document.getElementById('fre_modal');
     // @ts-ignore
-    // freModal.showModal();
+    freModal.showModal();
 
-    // freModal.addEventListener('focus', () => {
+    freModal.addEventListener('focus', () => {
         console.log("FRE Modal Loaded")
         // eat the fre cookie
         document.cookie = "D_FRE=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    // });
-}
-if (cookieExists("D_SECTOK")) {
-    document.cookie = "D_SECTOK=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-}
-if (cookieExists("D_NONCE")) {
-    document.cookie = "D_NONCE=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    });
 }
 
 signout_action.addEventListener("click", () => {

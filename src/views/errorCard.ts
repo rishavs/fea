@@ -1,6 +1,9 @@
 import { ServerError } from "../defs"
 
 export const errorCard = (err: ServerError | null) => {
+    if (!err) {
+        err = new ServerError("InternalServerError", "Internal Server Error")
+    }
     return /*html*/`
     <div class="card bg-error mt-16 rounded-none lg:rounded-box">
         <div class="card-body">
@@ -10,10 +13,10 @@ export const errorCard = (err: ServerError | null) => {
                 </button>
             </div>
             <article class="prose lg:prose-lg text-center self-center">
-                <h1>☠ { <span id="error_code">${err?.code}</span> }
-                    <span id="error_header"> ${err?.header} </span>
+                <h1>☠ { <span id="error_code">${err.code}</span> }
+                    <span id="error_header"> ${err.header} </span>
                 </h1>
-                <h3 id="error_details"> ${err?.details} </h3>
+                <h3 id="error_details"> ${err.userMsg} </h3>
             </article>
         </div>
     </div>
