@@ -23,7 +23,7 @@ export const signinToGoogle = async (ctx: Context) : Promise<Response> => {
     }).select()
         
     if (addNewSession.error) {
-        throw new ServerError(503, "Unable to signin. Please try again later", JSON.stringify(addNewSession.error))
+        throw new ServerError("GoogleAuthError", JSON.stringify(addNewSession.error))
     }
     console.log (`session created in db: ${JSON.stringify(addNewSession.data)}`)
     

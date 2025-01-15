@@ -6,7 +6,7 @@ export const signout = async (ctx: Context): Promise<Response> => {
     let cookies = parseCookies(ctx.req.raw.headers.get('Cookie') || "")
     
     if (!cookies.D_SID) {
-        console.error(new ServerError(503, '', "The session cookie wasn't found"))
+        console.error(new ServerError("InvalidSession", "The session cookie wasn't found"))
         return Response.redirect('/', 302)
     }
 

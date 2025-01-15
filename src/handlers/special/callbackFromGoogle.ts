@@ -17,19 +17,19 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     // console.log("Search Params", searchParams)
     let code = searchParams.get("code")
     if (!code) {
-        throw new ServerError(503, genericErrorMsg, "No signin code returned from Google")
+        throw new ServerError("GoogleAuthError", "No signin code returned from Google")
     }
     let state = searchParams.get("state")
     if (!state) {
-        throw new ServerError(503, genericErrorMsg, "No signin state returned from Google")
+        throw new ServerError("GoogleAuthError", "No signin state returned from Google")
     }
     let sid = JSON.parse(state).sid
     if (!sid) {
-        throw new ServerError(503, genericErrorMsg, "No sid value returned from Google")
+        throw new ServerError("GoogleAuthError", "No sid value returned from Google")
     }
     let secTokenFromGoogle = JSON.parse(state || "").sec_token
     if (!secTokenFromGoogle) {
-        throw new ServerError(503, genericErrorMsg, "No sec token value returned from Google")
+        throw new ServerError("GoogleAuthError", "No sec token value returned from Google")
     }
 
     let redirect = JSON.parse(state).redirect  || "/"
@@ -48,15 +48,15 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     .maybeSingle()
 
     if (sessionDetailsFromDB.error) {
-        throw new ServerError(503, genericErrorMsg, JSON.stringify(sessionDetailsFromDB.error))
+        throw new ServerError("GoogleAuthError", JSON.stringify(sessionDetailsFromDB.error))
     }
     if (!sessionDetailsFromDB.data?.sec_token || !sessionDetailsFromDB.data?.nonce) {
-        throw new ServerError(503, genericErrorMsg, "No sec token or nonce found in the database")
+        throw new ServerError("GoogleAuthError", "No sec token or nonce found in the database")
     }
 
     // if the session is older than 5 minutes, throw an error
     if (sessionDetailsFromDB.data?.created_at < new Date(Date.now() - Settings.newSessionAge).toISOString()) {
-        throw new ServerError(503, genericErrorMsg, "The session has expired")
+        throw new ServerError("GoogleAuthError", "The session has expired")
     }
 
     let secTokenFromDB = sessionDetailsFromDB.data.sec_token as string
@@ -67,7 +67,7 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     // Verify the Security Token
     // ------------------------------------------
     if (secTokenFromDB != secTokenFromGoogle) {
-        throw new ServerError(503, genericErrorMsg, "The security tokens do not match")
+        throw new ServerError("GoogleAuthError", "The security tokens do not match")
     }
 
     // ------------------------------------------
@@ -93,14 +93,14 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
 
     if (!tokenResponse.ok) {
         let errorResponse = await tokenResponse.text(); 
-        throw new ServerError(503, genericErrorMsg, 'Error in fetching id token: ' + errorResponse)
+        throw new ServerError("GoogleAuthError", 'Error in fetching id token: ' + errorResponse)
     } 
 
     let tokenData: any = await tokenResponse.json();
     
     let idToken = tokenData.id_token
     if (!idToken) {
-        throw new ServerError(503, genericErrorMsg, 'No id token was returned from Google')
+        throw new ServerError("GoogleAuthError", 'No id token was returned from Google')
     }
 
     const JWKS = createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'))
@@ -114,10 +114,10 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     // ------------------------------------------
     let nonceFromToken = payload.nonce
     if (!nonceFromToken) {
-        throw new ServerError(503, genericErrorMsg, 'Nonce was not found in the Google payload')
+        throw new ServerError("GoogleAuthError", 'Nonce was not found in the Google payload')
     }
     if (nonceFromToken != nonceFromDB) {
-        throw new ServerError(503, genericErrorMsg, 'The Nonce values do not match')
+        throw new ServerError("GoogleAuthError", 'The Nonce values do not match')
     }
 
     // ------------------------------------------
@@ -131,7 +131,7 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
         .maybeSingle()
 
     if (doesUserExistsInDb.error) {
-        throw new ServerError(500, "Unable to signin. Please try again later", JSON.stringify(doesUserExistsInDb.error))
+        throw new ServerError("UnauthorizedAccess", JSON.stringify(doesUserExistsInDb.error))
     }
     console.log("doesUserExistsInDb", doesUserExistsInDb.data)
 
@@ -168,7 +168,7 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
         }).select()
 
         if (addUserToDB.error) {
-            throw new ServerError(503, "Unable to signin. Please try again later", JSON.stringify(addUserToDB.error))
+            throw new ServerError("InternalServerError", JSON.stringify(addUserToDB.error))
         }
         console.log("Add User to DB", addUserToDB)
         user.id = addUserToDB.data[0].id
@@ -199,7 +199,7 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
 
     if (updateSession.error) {
         console.error("Error in updating session", updateSession.error)
-        throw new ServerError(503, "Unable to signin. Please try again later", JSON.stringify(updateSession.error))
+        throw new ServerError("InternalServerError", JSON.stringify(updateSession.error))
     }
     console.log (`session updated in db: ${JSON.stringify(updateSession.data)}`)
 
@@ -222,7 +222,6 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     // ------------------------------------------
     // Redirect to the original page
     // ------------------------------------------
-
     ctx.res.headers.append('Location', redirect)
     return new Response ('', {status: 302, headers: ctx.res.headers})
 }
