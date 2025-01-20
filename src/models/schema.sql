@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS users (
     banned_note           text,    -- note to self. not to be shown to end users
     total_banned_count    int DEFAULT 0, -- total number of times banned
 
-    created_at    timestamp DEFAULT CURRENT_TIMESTAMP, 
-    updated_at    timestamp DEFAULT CURRENT_TIMESTAMP, 
+    created_at    timestamp DEFAULT CURRENT_TIMESTAMPZ, 
+    updated_at    timestamp DEFAULT CURRENT_TIMESTAMPZ, 
     deleted_at    timestamp 
 
     CONSTRAINT atleast_one_oauth_id_check CHECK ((google_id IS NOT NULL) OR (apple_id IS NOT NULL))
@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS sessions (
     is_mobile     BOOLEAN,  -- from navigator api
     platform      text,  -- from navigator api
 
-    created_at    timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    initiated_at  timestamp, -- when the session was initiated
+    created_at    timestamp NOT NULL DEFAULT CURRENT_TIMESTAMPZ,
+    authenticated_at  timestamp, -- when the authenticated session was initiated
     deleted_at    timestamp
 );
 
@@ -80,8 +80,8 @@ CREATE TABLE IF NOT EXISTS posts (
     is_locked     boolean NOT NULL DEFAULT false,
     locked_for    text,
 
-    created_at    timestamp DEFAULT CURRENT_TIMESTAMP, 
-    updated_at    timestamp DEFAULT CURRENT_TIMESTAMP, 
+    created_at    timestamp DEFAULT CURRENT_TIMESTAMPZ, 
+    updated_at    timestamp DEFAULT CURRENT_TIMESTAMPZ, 
     archived_at   timestamp , -- after n days, archive posts. archived posts are not shown in feed and are read only
     locked_at     timestamp , -- similar to archived_at but is done intentionally for posts which are running off course
     deleted_at    timestamp 
@@ -104,6 +104,6 @@ CREATE TABLE IF NOT EXISTS posts_reported (
     resolved_by uuid REFERENCES "users" ,
     resolved_note   text ,
     
-    reported_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    reported_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMPZ
     resolved_at  TIMESTAMP
 );

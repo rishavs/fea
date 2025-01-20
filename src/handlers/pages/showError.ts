@@ -8,7 +8,6 @@ export const showError = async (ctx: Context): Promise<Response> => {
     let fragments = url.pathname.split("/")
     let errorHeader = fragments[2] ? fragments[2] as ServerErrorHeaderType : null;
     let sError: ServerError;
-    console.log("URL split", url.pathname.split("/"))
 
     // If this is a handled error, render the specific error page
     if (errorHeader && errorHeader in ServerErrorMessages) {

@@ -72,6 +72,7 @@ export const route = async (request: Request, env: Env) => {
         env: env,
         db : createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY),
     }
+    console.log("Cookies: ", ctx.req.cookies);
     
     // ------------------------------------------
     // Set Content type
@@ -80,6 +81,19 @@ export const route = async (request: Request, env: Env) => {
         ? 'application/json' 
         : 'text/html'
     )
+
+    // ------------------------------------------
+    // Set anonymous session
+    // ------------------------------------------
+    // let session = ctx.req.cookies['session'];
+    // if (session) {
+    //     let { data: user, error } = await ctx.db.from('users').select().eq('session', session).single();
+    //     if (error) {
+    //         console.error("Error getting user from session: ", error);
+    //     } else {
+    //         ctx.req.user = user;
+    //     }
+    // }
 
     // ------------------------------------------
     // Handle Routes
