@@ -7,7 +7,7 @@ import { header } from "./views/header";
 // ---------------------------------------
 export const Settings = {
     newSessionAge: 60 * 5, // 5 minutes
-    maxSessionAge : 60 * 60 * 24 * 30 // 30 days
+    maxSessionAge: 60 * 60 * 24 * 30 // 30 days
 }
 
 // ---------------------------------------
@@ -61,22 +61,22 @@ export const ServerErrorMessages = {
 } as const;
 export type ServerErrorHeaderType = keyof typeof ServerErrorMessages;
 export class ServerError extends Error {
-    code        : number;
-    header      : string;
-    userMsg     : string;
-    toErrorPage : boolean;
+    code: number;
+    header: string;
+    userMsg: string;
+    toErrorPage: boolean;
 
     constructor(
-        header          : ServerErrorHeaderType,
-        msg             : string, 
-        toErrorPage?    : boolean
+        header: ServerErrorHeaderType,
+        msg: string,
+        toErrorPage?: boolean
     ) {
         super(msg); // error details is stored in the message property
-        this.header         = ServerErrorMessages[header].header;
-        this.code           = ServerErrorMessages[header].code;
-        this.userMsg        = ServerErrorMessages[header].userMsg;
+        this.header = ServerErrorMessages[header].header;
+        this.code = ServerErrorMessages[header].code;
+        this.userMsg = ServerErrorMessages[header].userMsg;
 
-        this.toErrorPage    = toErrorPage ? toErrorPage : false;
+        this.toErrorPage = toErrorPage ? toErrorPage : false;
 
         this.name = "Server Error " + this.code + ": " + this.header;
     }
@@ -93,30 +93,32 @@ export type AppRoute = {
 }
 
 export type Context = {
-	req: {
+    req: {
         raw: Request,
         url: URL,
         params: {
             cat?: string,
             slug?: string,
-        }
+        },
+        sid: string | null,
+        isAuthenticated: boolean,
         user: User | null,
         cookies: Record<string, string>,
     },
     env: Env,
-	res: {
-		status: 	number,
-		headers: 	Headers,
-		body: 	string,
-	},
+    res: {
+        status: number,
+        headers: Headers,
+        body: string,
+    },
     db: SupabaseClient,
-    
+
 }
 
 export type Page = {
-	title: 		string,
-	content: 	string,
-    error:      ServerError | null,
+    title: string,
+    content: string,
+    error: ServerError | null,
 }
 
 // ---------------------------------------
@@ -126,81 +128,120 @@ type UserRoles = 'admin' | 'moderator' | 'user' | 'anonymous'
 type UserLevels = 'leaf' | 'wood' | 'pebble' | 'rock' | 'copper' | 'silver' | 'gold' | 'mithril'
 
 export type User = {
-    id?: 			    string,
-    googleId?: 	        string,
-    appleId?: 		    string,
-    extId: 		        string,
+    id?: string,
+    googleId?: string,
+    appleId?: string,
+    extId: string,
 
-    slug: 			    string,
-    name: 			    string,
-    thumb: 			    string,
-    pronouns: 		    (typeof UserPronouns)[keyof typeof UserPronouns]
-    honorific: 		    string,
-    flair: 			    string,
-    role: 			    UserRoles,
-    level: 			    UserLevels,
-    stars: 			    number,
-    creds: 			    number,
-    gil: 			    number,
-   
-    bannedAt?: 			Date,
-    bannedTill?: 		Date,
-    bannedNote?: 		string,
-    totalBannedCount?: 	number,
+    slug: string,
+    name: string,
+    thumb: string,
+    pronouns: (typeof UserPronouns)[keyof typeof UserPronouns]
+    honorific: string,
+    flair: string,
+    role: UserRoles,
+    level: UserLevels,
+    stars: number,
+    creds: number,
+    gil: number,
 
-    createdAt?: 		Date,
-    updatedAt?: 		Date,
-    deletedAt?: 		Date,
+    bannedAt?: Date,
+    bannedTill?: Date,
+    bannedNote?: string,
+    totalBannedCount?: number,
+
+    createdAt?: Date,
+    updatedAt?: Date,
+    deletedAt?: Date,
+}
+// {                                     
+//     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',                                               
+//     userAgentData: {                                        
+//         brands: [
+//             { brand: 'Google Chrome', version: '131' },
+//             { brand: 'Chromium', version: '131' },
+//             { brand: 'Not_A Brand', version: '24' }         
+//       mobile: false,                                        
+//       platform: 'Windows'
+//     },
+//     platform: 'Win32',
+//     vendor: 'Google Inc.',
+//     language: 'en-US'
+//   }
+
+export type UserClientInfo = {
+    navigator: {
+        connection: {
+            downlink:       number | null,
+            effectiveType:  string | null,
+            rtt:            number | null,
+            saveData:       boolean | null, 
+        },
+        userAgent:          string | null,
+        userAgentData: {
+            brands:         string | null,
+            mobile:         boolean | null,
+        },
+        platform: string | null,
+        language: string | null,
+    },
+    window: {
+        width: number | null,
+        height: number | null,
+        pixel_ratio: number | null,
+        orientation: string | null,
+    },
+
 }
 
 // ---------------------------------------
 // Post Definitions
 // ---------------------------------------
 export type Post = {
-    id:             string,
-    authorId:       string,
-    slug:           string,
-    category:       (typeof PostCategories)[keyof typeof PostCategories]
-    type:           (typeof NewPostTypes)[keyof typeof NewPostTypes]
-    title:          string,
-    link:           string,
-    thumb:          string,
-    content:        string,
-    displayScore:   number,
+    id: string,
+    authorId: string,
+    slug: string,
+    category: (typeof PostCategories)[keyof typeof PostCategories]
+    type: (typeof NewPostTypes)[keyof typeof NewPostTypes]
+    title: string,
+    link: string,
+    thumb: string,
+    content: string,
+    displayScore: number,
 
-    ogTitle?:       string,
-    ogDesc?:        string,
-    ogImage?:       string,
-    ogImageAlt?:    string,
-    ogIcon?:        string,
-    ogURL?:         string,
+    ogTitle?: string,
+    ogDesc?: string,
+    ogImage?: string,
+    ogImageAlt?: string,
+    ogIcon?: string,
+    ogURL?: string,
 
-    bodyImage?:     string,
+    bodyImage?: string,
 
-    isLocked?:      boolean,
-    lockedFor?:     string,
-    isAnonymous:    boolean
+    isLocked?: boolean,
+    lockedFor?: string,
+    isAnonymous: boolean
 
-    createdAt?:     Date,
-    updatedAt?:     Date,
-    archivedAt?:    Date,
-    lockedAt?:      Date,
-    deletedAt?:     Date,
+    createdAt?: Date,
+    updatedAt?: Date,
+    archivedAt?: Date,
+    lockedAt?: Date,
+    deletedAt?: Date,
 }
 
 export type PostLinkBodyImage = {
-	src: string;
-	width?: number;
-	height?: number;
-	area?: number;
+    src: string;
+    width?: number;
+    height?: number;
+    area?: number;
 };
 
 export type PostLinkOGModel = {
-	title?: string;
-	desc?: string;
-	image?: string;
-	imageAlt?: string;
-	icon?: string;
+    title?: string;
+    desc?: string;
+    image?: string;
+    imageAlt?: string;
+    icon?: string;
     url?: string;
 
     bodyImage?: string;

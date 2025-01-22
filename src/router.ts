@@ -9,13 +9,16 @@ import { signout } from "./handlers/special/signout";
 import { showPostsList } from "./handlers/pages/showPostsList";
 import { showPostDetails } from "./handlers/pages/showPostDetails";
 import { showNewPost } from "./handlers/pages/showNewPost";
-import { getUserFromSession } from "./handlers/helpers/getUserFromSession";
+// import { getUserFromSession } from "./handlers/helpers/getUserFromSession";
 import { PostCategories } from "../pub/sharedDefs";
 import { showUserDetails } from "./handlers/pages/showUserDetails";
-import { updateUserDetails } from "./handlers/apis/updateUserDetails";
-import { saveNewPost } from "./handlers/apis/saveNewPost";
+// import { updateUserDetails } from "./handlers/apis/updateUserDetails";
+// import { saveNewPost } from "./handlers/apis/saveNewPost";
 import { buildPage } from "./views/buildPage";
 import { showError } from "./handlers/pages/showError";
+import { customAlphabet } from "nanoid";
+import { addUserInfoToSession } from "./handlers/apis/addUserInfoToSession";
+import { getUserFromSession } from "./handlers/helpers/getUserFromSession";
 
 const setPath = (str: string) => {
     return new URLPattern({ pathname: str }) 
@@ -33,8 +36,9 @@ const routes: AppRoute[] = [
     { method: 'GET', path: setPath(`/signout`), allow: [], handler: signout, },
     
     // API routes
-    { method: 'POST', path: setPath(`/api/update-user-details`), allow: ['user', 'moderator', 'admin'], handler: updateUserDetails, },
-    { method: 'POST', path: setPath(`/api/save-new-post`), allow: ['user', 'moderator', 'admin'], handler: saveNewPost, },
+    { method: 'POST', path: setPath(`/api/save-user-info`), allow: ['user', 'moderator', 'admin'], handler: addUserInfoToSession, },
+    // { method: 'POST', path: setPath(`/api/update-user-details`), allow: ['user', 'moderator', 'admin'], handler: updateUserDetails, },
+    // { method: 'POST', path: setPath(`/api/save-new-post`), allow: ['user', 'moderator', 'admin'], handler: saveNewPost, },
 
     // Dynamic error routes
     { method: 'GET', path: setPath(`/error/:id`), allow: [], handler: showError },
@@ -61,6 +65,8 @@ export const route = async (request: Request, env: Env) => {
             raw: request,
             url: url,
             params: {},
+            sid: null,
+            isAuthenticated: false,
             user: null,
             cookies: parseCookies(request.headers.get('Cookie') || "")
         },
@@ -85,15 +91,19 @@ export const route = async (request: Request, env: Env) => {
     // ------------------------------------------
     // Set anonymous session
     // ------------------------------------------
-    // let session = ctx.req.cookies['session'];
-    // if (session) {
-    //     let { data: user, error } = await ctx.db.from('users').select().eq('session', session).single();
-    //     if (error) {
-    //         console.error("Error getting user from session: ", error);
-    //     } else {
-    //         ctx.req.user = user;
-    //     }
-    // }
+    if (!ctx.req.cookies['D_SID']) {
+        const addNewSession = await ctx.db.from('sessions').insert({
+            id: customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 32)(),
+            user_agent: ctx.req.raw.headers.get('User-Agent'),
+        }).select()
+        if (addNewSession.error) {
+            throw new ServerError("InternalServerError", JSON.stringify(addNewSession.error))
+        }
+        console.log (`session created in db: ${JSON.stringify(addNewSession.data)}`)
+        ctx.res.headers.append('Set-Cookie', `D_SID=${addNewSession.data[0].id}; Max-Age=86400; Path=/; Secure; HttpOnly; SameSite=Strict`)
+        // Have the browser send the user info
+        ctx.res.headers.append('Set-Cookie', `D_SEND_USER_INFO=true;`)
+    }
 
     // ------------------------------------------
     // Handle Routes
@@ -102,9 +112,6 @@ export const route = async (request: Request, env: Env) => {
         for (const {method, path, allow, handler } of routes) {
             let match = path.exec(url);
             if (request.method === method && match) {
-                // if (route.protected) {
-                //     fetch the userid from session
-                // }
                 ctx.req.params = match.pathname.groups;
                 if (ctx.req.params.cat && 
                     !Object.keys(PostCategories).includes(ctx.req.params.cat)

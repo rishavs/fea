@@ -10,15 +10,15 @@ export const parseCookies = (cookie: string | null) => {
     return cookies
 }
 
-const TIMEOUT = 5000; // Set timeout to 5 seconds
-export const fetchURL = (url: string, options: any) => {
-    return Promise.race([
-        fetch(url, options),
-        new Promise((_, reject) =>
-            setTimeout(
-                () => reject(new Error('503', {cause:'Request timed out'})), 
-                TIMEOUT
-            )
-        )
-    ]);
-};
+// const TIMEOUT = 5000; // Set timeout to 5 seconds
+// export const fetchURL = (url: string, options: any) => {
+//     return Promise.race([
+//         fetch(url, options),
+//         new Promise((_, reject) =>
+//             setTimeout(
+//                 () => reject(new Error('503', {cause:'Request timed out'})), 
+//                 TIMEOUT
+//             )
+//         )
+//     ]);
+// };

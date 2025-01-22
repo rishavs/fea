@@ -36,19 +36,73 @@ if (cookieExists("D_SYNC_USER")) {
     window.location.reload();
 } 
 
-if (cookieExists("D_FRE")) {
-    console.log("FRE Triggered")
-    // open fre modal
-    let freModal = document.getElementById('fre_modal');
-    // @ts-ignore
-    freModal.showModal();
+// if (cookieExists("D_FRE")) {
+//     console.log("FRE Triggered")
+//     // open fre modal
+//     let freModal = document.getElementById('fre_modal');
+//     // @ts-ignore
+//     freModal.showModal();
 
-    freModal.addEventListener('focus', () => {
-        console.log("FRE Modal Loaded")
-        // eat the fre cookie
-        document.cookie = "D_FRE=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    });
+//     freModal.addEventListener('focus', () => {
+//         console.log("FRE Modal Loaded")
+//         // eat the fre cookie
+//         document.cookie = "D_FRE=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+//     });
+// }
+
+if (cookieExists("D_SEND_USER_INFO")) {
+    console.log("User Info Sync Triggered")
+
+    // make a POST request to the server with the user info from navigator
+    try {
+        const userData = {
+            navigator: {
+                connection: {
+                    downlink:       navigator.connection.downlink,
+                    effectiveType:  navigator.connection.effectiveType,
+                    rtt:            navigator.connection.rtt,
+                    saveData:       navigator.connection.saveData,
+                },
+                userAgent:          navigator.userAgent,
+                userAgentData: {
+                    brands:         navigator.userAgentData.brands,
+                    mobile:         navigator.userAgentData.mobile,
+                },
+                platform:           navigator.platform,
+                language:           navigator.language,
+            },
+            window: {
+                width:              window.innerWidth,
+                height:             window.innerHeight,
+                pixel_ratio:        window.devicePixelRatio,
+                orientation:        window.screen.orientation.type,
+            },
+        }
+        const response = fetch("/api/save-user-info", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                console.error('Fetch Error:', response);
+            } else {
+                document.cookie = "D_SEND_USER_INFO=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                console.log("The following User Info was sent to the server: ", userData)
+            }
+        })
+
+
+    }
+    catch (error) {
+        console.error("Error sending user info", error)
+    }
+
+
 }
+
 
 signout_action.addEventListener("click", () => {
     console.log("Starting signout process....")

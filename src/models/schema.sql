@@ -17,14 +17,14 @@ CREATE TABLE IF NOT EXISTS users (
     creds         int NOT NULL DEFAULT 0,
     gil           int NOT NULL DEFAULT 0,
 
-    banned_at             timestamp,
-    banned_till           timestamp,
+    banned_at             timestamptz,
+    banned_till           timestamptz,
     banned_note           text,    -- note to self. not to be shown to end users
     total_banned_count    int DEFAULT 0, -- total number of times banned
 
-    created_at    timestamp DEFAULT CURRENT_TIMESTAMPZ, 
-    updated_at    timestamp DEFAULT CURRENT_TIMESTAMPZ, 
-    deleted_at    timestamp 
+    created_at    timestamptz DEFAULT CURRENT_TIMESTAMP, 
+    updated_at    timestamptz DEFAULT CURRENT_TIMESTAMP, 
+    deleted_at    timestamptz 
 
     CONSTRAINT atleast_one_oauth_id_check CHECK ((google_id IS NOT NULL) OR (apple_id IS NOT NULL))
 );
@@ -33,17 +33,30 @@ CREATE TABLE IF NOT EXISTS sessions (
     id            text PRIMARY KEY, -- Stronger bits as this is public
     user_id       uuid REFERENCES "users", -- Nullable for anonymous sessions
     
-    sec_token     text NOT NULL, -- for establishing oauth session
-    nonce         text NOT NULL, -- for establishing oauth session
+    sec_token     text, -- for establishing oauth session
+    nonce         text, -- for establishing oauth session
 
     user_agent    text,
-    brands        text, -- from navigator api
-    is_mobile     BOOLEAN,  -- from navigator api
-    platform      text,  -- from navigator api
 
-    created_at    timestamp NOT NULL DEFAULT CURRENT_TIMESTAMPZ,
-    authenticated_at  timestamp, -- when the authenticated session was initiated
-    deleted_at    timestamp
+    conn_downlink    text,
+    conn_effective_type    text,
+    conn_rtt    text,
+    conn_save_data    text,
+
+    window_width    text,
+    window_height   text,
+    window_pixel_ratio    text,
+    window_orientation    text,
+
+    nav_user_agent    text,
+    nav_brands    text,
+    nav_is_mobile    boolean,
+    nav_platform    text,
+    nav_language    text,
+    
+    created_at    timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    authenticated_at  timestamptz, -- when the authenticated session was initiated
+    updated_at    timestamptz DEFAULT CURRENT_TIMESTAMP
 );
 
 INSERT INTO users 
@@ -80,11 +93,11 @@ CREATE TABLE IF NOT EXISTS posts (
     is_locked     boolean NOT NULL DEFAULT false,
     locked_for    text,
 
-    created_at    timestamp DEFAULT CURRENT_TIMESTAMPZ, 
-    updated_at    timestamp DEFAULT CURRENT_TIMESTAMPZ, 
-    archived_at   timestamp , -- after n days, archive posts. archived posts are not shown in feed and are read only
-    locked_at     timestamp , -- similar to archived_at but is done intentionally for posts which are running off course
-    deleted_at    timestamp 
+    created_at    timestamptz DEFAULT CURRENT_TIMESTAMP, 
+    updated_at    timestamptz DEFAULT CURRENT_TIMESTAMP, 
+    archived_at   timestamptz , -- after n days, archive posts. archived posts are not shown in feed and are read only
+    locked_at     timestamptz , -- similar to archived_at but is done intentionally for posts which are running off course
+    deleted_at    timestamptz 
 );
 
 CREATE TABLE IF NOT EXISTS posts_dug (
@@ -104,6 +117,6 @@ CREATE TABLE IF NOT EXISTS posts_reported (
     resolved_by uuid REFERENCES "users" ,
     resolved_note   text ,
     
-    reported_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMPZ
+    reported_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     resolved_at  TIMESTAMP
 );
