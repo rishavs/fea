@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { parseCookies } from "./utils";
-import { AppRoute, Context, Page, ServerError  } from "./defs";
+import { AppRoute, Context, Page, ServerError, Settings, User  } from "./defs";
 import { buildHTML } from "./views/buildHTML";
 import { showHome } from "./handlers/pages/showHome";
 import { signinToGoogle } from "./handlers/special/signinToGoogle";
@@ -20,33 +20,39 @@ import { customAlphabet } from "nanoid";
 import { addUserInfoToSession } from "./handlers/apis/addUserInfoToSession";
 import { getUserFromSession } from "./handlers/helpers/getUserFromSession";
 
-const setPath = (str: string) => {
-    return new URLPattern({ pathname: str }) 
+const setRoute = (
+    method: "GET" | "POST", 
+    path: string, 
+    allow: User['role'][], 
+    handler: (ctx: Context) => Promise<Response>,
+
+) => {
+    return { method, path: new URLPattern({ pathname: path }) , allow, handler }
 }
 
+// Define routes
 const routes: AppRoute[] = [
-    // Static routes
-    { method: 'GET', path: setPath('/'), allow: [], handler: showHome },
-    { method: 'GET', path: setPath('/p/new'), allow: [], handler: showNewPost, },
-    // { method: 'GET', path: setPath('/throw'), allow: [], handler: () => {throw new ServerError400("I threw a 400 err")}, },
-
+    // Static page routes
+    setRoute('GET', '/', ['anonymous'], showHome),
+    setRoute('GET', '/p/new', ['anonymous'], showNewPost),
+    // setRoute('GET', '/throw', [], () => {throw new ServerError400("I threw a 400 err")}),
+    
     // Special routes
-    { method: 'GET', path: setPath(`/signin/google`), allow: [], handler: signinToGoogle,  },
-    { method: 'GET', path: setPath(`/callback/google`), allow: [], handler: callbackFromGoogle, },    
-    { method: 'GET', path: setPath(`/signout`), allow: [], handler: signout, },
+    setRoute('GET', `/signin/google`, ['anonymous'], signinToGoogle),
+    setRoute('GET', `/callback/google`, ['anonymous'], callbackFromGoogle),
+    setRoute('GET', `/signout`, ['user', 'moderator', 'admin'], signout),
     
     // API routes
-    { method: 'POST', path: setPath(`/api/save-user-info`), allow: ['user', 'moderator', 'admin'], handler: addUserInfoToSession, },
-    // { method: 'POST', path: setPath(`/api/update-user-details`), allow: ['user', 'moderator', 'admin'], handler: updateUserDetails, },
-    // { method: 'POST', path: setPath(`/api/save-new-post`), allow: ['user', 'moderator', 'admin'], handler: saveNewPost, },
-
+    setRoute('POST', `/api/save-user-demographic-info`, ['anonymous'], addUserInfoToSession),
+    // setRoute('POST', `/api/update-user-details`, ['user', 'moderator', 'admin'], updateUserDetails),
+    // setRoute('POST', `/api/save-new-post`, ['user', 'moderator', 'admin'], saveNewPost),
     // Dynamic error routes
-    { method: 'GET', path: setPath(`/error/:id`), allow: [], handler: showError },
-
-    // Dynamic routes
-    { method: 'GET', path: setPath(`/user/:slug`), allow: [], handler: showUserDetails },
-    { method: 'GET', path: setPath(`/:cat`), allow: [], handler: showPostsList },
-    { method: 'GET', path: setPath(`/:cat/:id`), allow: [], handler: showPostDetails },
+    setRoute('GET', `/error/:id`, ['anonymous'], showError),
+    
+    // Dynamic page routes
+    setRoute('GET', `/:cat`, ['anonymous'], showPostsList),
+    setRoute('GET', `/:cat/:id`, ['anonymous'], showPostDetails),
+    setRoute('GET', `/user/:slug`, ['anonymous'], showUserDetails),
 ];
 
 // Main route function
@@ -65,9 +71,9 @@ export const route = async (request: Request, env: Env) => {
             raw: request,
             url: url,
             params: {},
-            sid: null,
-            isAuthenticated: false,
+            isSignedIn: false,
             user: null,
+            allow: ['admin'],
             cookies: parseCookies(request.headers.get('Cookie') || "")
         },
         res: {
@@ -100,7 +106,8 @@ export const route = async (request: Request, env: Env) => {
             throw new ServerError("InternalServerError", JSON.stringify(addNewSession.error))
         }
         console.log (`session created in db: ${JSON.stringify(addNewSession.data)}`)
-        ctx.res.headers.append('Set-Cookie', `D_SID=${addNewSession.data[0].id}; Max-Age=86400; Path=/; Secure; HttpOnly; SameSite=Strict`)
+        ctx.res.headers.append('Set-Cookie', `D_SID=${addNewSession.data[0].id}; Max-Age=${Settings.maxSessionAge}; Path=/; Secure; HttpOnly; SameSite=Strict`)
+        ctx.res.headers.append('Set-Cookie', `D_IS_SIGNEDIN=false; Max-Age=${Settings.maxSessionAge}; Path=/; Secure; HttpOnly; SameSite=Strict`)
         // Have the browser send the user info
         ctx.res.headers.append('Set-Cookie', `D_SEND_USER_INFO=true;`)
     }
@@ -118,9 +125,17 @@ export const route = async (request: Request, env: Env) => {
                 ) {
                     throw new ServerError("PageNotFound", "Error 404: Invalid Category: " + ctx.req.params.cat)
                 }
+                // ------------------------------------------
                 // Auth check + Role based access control
-                if (allow.length > 0 ) await getUserFromSession(ctx, {method, path, allow, handler});
-
+                // ------------------------------------------
+                ctx.req.allow = allow;
+                if (
+                    ctx.req.allow.includes('user') 
+                    || ctx.req.allow.includes('moderator') 
+                    || ctx.req.allow.includes('admin')
+                ) {
+                    await getUserFromSession(ctx);
+                }
                 return await handler(ctx);
             } 
         }

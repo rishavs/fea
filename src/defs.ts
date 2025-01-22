@@ -7,7 +7,7 @@ import { header } from "./views/header";
 // ---------------------------------------
 export const Settings = {
     newSessionAge: 60 * 5, // 5 minutes
-    maxSessionAge: 60 * 60 * 24 * 30 // 30 days
+    maxSessionAge: 60 * 60 * 24 * 30 // 30 days = 
 }
 
 // ---------------------------------------
@@ -100,9 +100,9 @@ export type Context = {
             cat?: string,
             slug?: string,
         },
-        sid: string | null,
-        isAuthenticated: boolean,
+        isSignedIn: boolean,
         user: User | null,
+        allow: User['role'][],
         cookies: Record<string, string>,
     },
     env: Env,

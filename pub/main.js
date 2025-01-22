@@ -78,7 +78,7 @@ if (cookieExists("D_SEND_USER_INFO")) {
                 orientation:        window.screen.orientation.type,
             },
         }
-        const response = fetch("/api/save-user-info", {
+        const response = fetch("/api/save-user-demographic-info", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
@@ -98,6 +98,7 @@ if (cookieExists("D_SEND_USER_INFO")) {
     }
     catch (error) {
         console.error("Error sending user info", error)
+        // TODO - signout & redirect to error page
     }
 
 
