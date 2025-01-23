@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     nav_language    text,
     
     created_at    timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    authenticated_at  timestamptz, -- when the authenticated session was initiated
+    signedin_at  timestamptz, -- when the authenticated session was initiated
     updated_at    timestamptz DEFAULT CURRENT_TIMESTAMP
 );
 

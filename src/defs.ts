@@ -1,6 +1,63 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NewPostTypes, PostCategories, UserPronouns } from "../pub/sharedDefs";
-import { header } from "./views/header";
+import { addUserInfoToSession } from "./handlers/apis/addUserInfoToSession";
+import { showError } from "./handlers/pages/showError";
+import { showHome } from "./handlers/pages/showHome";
+import { showNewPost } from "./handlers/pages/showNewPost";
+import { showPostDetails } from "./handlers/pages/showPostDetails";
+import { showPostsList } from "./handlers/pages/showPostsList";
+import { showUserDetails } from "./handlers/pages/showUserDetails";
+import { callbackFromGoogle } from "./handlers/special/callbackFromGoogle";
+import { signinToGoogle } from "./handlers/special/signinToGoogle";
+import { signout } from "./handlers/special/signout";
+
+// ---------------------------------------
+// App Routes
+// ---------------------------------------
+export type AppRoute = {
+    method: 'GET' | 'POST',
+    path: URLPattern,
+    allow: User['role'][],
+    handler: (ctx: Context) => Promise<Response>,
+}
+
+const setRoute = (
+    method: "GET" | "POST", 
+    path: string, 
+    allow: User['role'][], 
+    handler: (ctx: Context) => Promise<Response>,
+
+) => {
+    return { method, path: new URLPattern({ pathname: path }) , allow, handler }
+}
+
+// Define routes
+export const routes: AppRoute[] = [
+    // dev routes
+    // setRoute('GET', '/query', ['anonymous'], runDBQuery),
+
+    // Static page routes
+    setRoute('GET', '/', ['anonymous'], showHome),
+    setRoute('GET', '/p/new', ['anonymous'], showNewPost),
+    // setRoute('GET', '/throw', [], () => {throw new ServerError400("I threw a 400 err")}),
+    
+    // Special routes
+    setRoute('GET', `/signin/google`, ['anonymous'], signinToGoogle),
+    setRoute('GET', `/callback/google`, ['anonymous'], callbackFromGoogle),
+    setRoute('GET', `/signout`, ['user', 'moderator', 'admin'], signout),
+    
+    // API routes
+    setRoute('POST', `/api/save-user-demographic-info`, ['anonymous'], addUserInfoToSession),
+    // setRoute('POST', `/api/update-user-details`, ['user', 'moderator', 'admin'], updateUserDetails),
+    // setRoute('POST', `/api/save-new-post`, ['user', 'moderator', 'admin'], saveNewPost),
+    // Dynamic error routes
+    setRoute('GET', `/error/:id`, ['anonymous'], showError),
+    
+    // Dynamic page routes
+    setRoute('GET', `/:cat`, ['anonymous'], showPostsList),
+    setRoute('GET', `/:cat/:id`, ['anonymous'], showPostDetails),
+    setRoute('GET', `/user/:slug`, ['anonymous'], showUserDetails),
+];
 
 // ---------------------------------------
 // App Settings
@@ -85,13 +142,6 @@ export class ServerError extends Error {
 // ---------------------------------------
 // server Context
 // ---------------------------------------
-export type AppRoute = {
-    method: 'GET' | 'POST',
-    path: URLPattern,
-    allow: User['role'][],
-    handler: (ctx: Context) => Promise<Response>,
-}
-
 export type Context = {
     req: {
         raw: Request,
@@ -129,9 +179,9 @@ type UserLevels = 'leaf' | 'wood' | 'pebble' | 'rock' | 'copper' | 'silver' | 'g
 
 export type User = {
     id?: string,
-    googleId?: string,
-    appleId?: string,
-    extId: string,
+    google_id?: string,
+    apple_id?: string,
+    ext_id: string,
 
     slug: string,
     name: string,
@@ -145,29 +195,15 @@ export type User = {
     creds: number,
     gil: number,
 
-    bannedAt?: Date,
-    bannedTill?: Date,
-    bannedNote?: string,
-    totalBannedCount?: number,
+    banned_at?: Date,
+    banned_till?: Date,
+    banned_note?: string,
+    total_banned_count?: number,
 
-    createdAt?: Date,
-    updatedAt?: Date,
-    deletedAt?: Date,
+    created_at?: Date,
+    updated_at?: Date,
+    deleted_at?: Date,
 }
-// {                                     
-//     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',                                               
-//     userAgentData: {                                        
-//         brands: [
-//             { brand: 'Google Chrome', version: '131' },
-//             { brand: 'Chromium', version: '131' },
-//             { brand: 'Not_A Brand', version: '24' }         
-//       mobile: false,                                        
-//       platform: 'Windows'
-//     },
-//     platform: 'Win32',
-//     vendor: 'Google Inc.',
-//     language: 'en-US'
-//   }
 
 export type UserClientInfo = {
     navigator: {

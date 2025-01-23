@@ -15,7 +15,7 @@ export const addUserInfoToSession = async (ctx: Context): Promise<Response> => {
     // Parse the JSON data from the request body
     const data = await ctx.req.raw.json() as UserClientInfo;
 
-    console.log('Received JSON data:', data);
+    // console.log('Received JSON data:', data);
 
     // Validate the data
     if (!data || typeof data !== 'object') {
@@ -25,21 +25,6 @@ export const addUserInfoToSession = async (ctx: Context): Promise<Response> => {
     // ------------------------------------------
     // Save user info to session in db
     // ------------------------------------------
-    // {                                     
-    //     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',                                               
-    //     userAgentData: {                                        
-    //         brands: [
-    //             { brand: 'Google Chrome', version: '131' },
-    //             { brand: 'Chromium', version: '131' },
-    //             { brand: 'Not_A Brand', version: '24' }         
-    //       mobile: false,                                        
-    //       platform: 'Windows'
-    //     },
-    //     platform: 'Win32',
-    //     vendor: 'Google Inc.',
-    //     language: 'en-US'
-    //   }
-    
     const resSaveUserInfoToDB = await ctx.db.from('sessions')
         .update({
             conn_downlink: data.navigator.connection.downlink || null,

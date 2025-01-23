@@ -38,6 +38,6 @@ export const getUserFromSession = async (ctx: Context) => {
 
     // Check if the user is allowed to access the resource
     if (!ctx.req.user || !ctx.req.allow.includes(ctx.req.user.role)) {
-        throw new ServerError("UnauthorizedAccess", "User with role:" + ctx.req.user?.role + " attempted to access a restricted resource")
+        throw new ServerError("UnauthorizedAccess", `User with id: ${ctx.req.user?.id} & role: ${ctx.req.user?.role} attempted to access a restricted resource`)
     }
 }

@@ -10,11 +10,7 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     // Read Query Params
     // ------------------------------------------
     let searchParams = new URLSearchParams(ctx.req.url.search)
-
-    let genericErrorMsg = "Unable to signin using the Google account. Please delete all cookies and try again."
-    
-
-    // console.log("Search Params", searchParams)
+    console.log("Search Params", searchParams)
     let code = searchParams.get("code")
     if (!code) {
         throw new ServerError("GoogleAuthError", "No signin code returned from Google")
@@ -27,7 +23,7 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     if (!sid) {
         throw new ServerError("GoogleAuthError", "No sid value returned from Google")
     }
-    let secTokenFromGoogle = JSON.parse(state || "").sec_token
+    let secTokenFromGoogle = JSON.parse(state).sec_token
     if (!secTokenFromGoogle) {
         throw new ServerError("GoogleAuthError", "No sec token value returned from Google")
     }
@@ -46,7 +42,6 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     .eq('id', sid)
     .limit(1)
     .maybeSingle()
-
     if (sessionDetailsFromDB.error) {
         throw new ServerError("GoogleAuthError", JSON.stringify(sessionDetailsFromDB.error))
     }
@@ -55,8 +50,12 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     }
 
     // if the session is older than 5 minutes, throw an error
-    if (sessionDetailsFromDB.data?.created_at < new Date(Date.now() - Settings.newSessionAge).toISOString()) {
-        throw new ServerError("GoogleAuthError", "The session has expired")
+    const sessionCreatedAt = new Date(sessionDetailsFromDB.data.created_at);
+    const sessionExpiryTime = new Date(Date.now() - Settings.newSessionAge * 1000);
+
+    if (sessionCreatedAt < sessionExpiryTime) {
+        console.log(`created_at: ${sessionCreatedAt.toISOString()}, now: ${new Date().toISOString()}`);
+        throw new ServerError("InvalidSession", "The session has expired");
     }
 
     let secTokenFromDB = sessionDetailsFromDB.data.sec_token as string
@@ -152,19 +151,19 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
         user.stars          = 0
         user.creds          = 0
         user.gil            = 0
-        user.googleId      = payload.email as string
-        user.extId         = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 32)()
+        user.google_id      = payload.email as string
+        user.ext_id         = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 32)()
 
         const addUserToDB = await ctx.db.from('users').insert({
             flair       : user.flair, 
-            google_id   : user.googleId, 
+            google_id   : user.google_id, 
             honorific   : user.honorific, 
             level       : user.level, 
             name        : user.name, 
             role        : user.role, 
             slug        : user.slug, 
             thumb       : user.thumb,
-            ext_id      : user.extId
+            ext_id      : user.ext_id
         }).select()
 
         if (addUserToDB.error) {
@@ -192,7 +191,7 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     .update({ 
         user_id     : user.id, 
         user_agent  : userAgent,
-        initiated_at: new Date().toISOString(),
+        signedin_at : new Date().toISOString(),
     })
     .eq('id', sid)
     .select()
@@ -205,17 +204,20 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
 
     ctx.res.headers.append('Set-Cookie', 
         `D_SID=${updateSession.data[0].id}; Max-Age=${Settings.maxSessionAge}; path=/; HttpOnly; Secure; SameSite=Strict;`);
+    ctx.res.headers.append('Set-Cookie', 
+        `D_IS_SIGNEDIN=true; Max-Age=${Settings.maxSessionAge}; Path=/; Secure; HttpOnly; SameSite=Strict`)
 
     // ------------------------------------------
     // Sync the user details with the browser
     // ------------------------------------------
     // Remove the ids from the user object
     delete user.id
-    delete user.googleId
-    delete user.appleId
+    delete user.google_id
+    delete user.apple_id
 
     // send the user object in the cookie
     let userEncoded = encodeURIComponent(JSON.stringify(user))
+    console.log("User Encoded", userEncoded)
     ctx.res.headers.append('Set-Cookie', 
         `D_SYNC_USER=${userEncoded}; path=/; Secure; SameSite=Strict;`)
 
