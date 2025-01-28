@@ -25,6 +25,6 @@ export const showError = async (ctx: Context): Promise<Response> => {
         error: sError,
     }
 
-    return new Response(buildPage(page), { headers: ctx.res.headers });
+    return new Response(buildPage(ctx, page), { headers: ctx.res.headers });
 
 }

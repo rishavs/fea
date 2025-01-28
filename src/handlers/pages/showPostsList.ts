@@ -10,5 +10,5 @@ export const showPostsList = async (ctx: Context): Promise<Response> => {
         content: `<h1>Viewing Posts for cat ${cat}</h1>`,
         error: null
     }
-    return new Response(buildPage(page), { headers: ctx.res.headers });
+    return new Response(buildPage(ctx, page), { headers: ctx.res.headers });
 }

@@ -6,5 +6,7 @@ interface Env {
 	SUPABASE_ANON_KEY: string;
 	GOOGLE_CLIENT_ID: string;
 	GOOGLE_CLIENT_SECRET: string;
-	ASSETS: Fetcher;
+	DOMAIN: string;
+	STORAGE: R2Bucket;
+	STATIC_FILES: Fetcher;
 }

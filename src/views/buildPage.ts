@@ -1,4 +1,5 @@
 import {
+    Context,
     Page
 } from '../defs';
 import {
@@ -14,7 +15,7 @@ import {
     header
 } from './header';
 
-export const buildPage = (page: Page) => {
+export const buildPage = (ctx: Context, page: Page) => {
     return /*html*/ `
 <!DOCTYPE html>
 <html lang="en" data-theme="nord" dir="ltr">
@@ -29,12 +30,22 @@ export const buildPage = (page: Page) => {
 
     <meta name="description" content="">
 
-    <head prefix="og: http://ogp.me/ns#">
-        <meta property="og:type" content="article">
-        <meta property="og:title" content="">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="">
 
-        <link href="/main.css" rel="stylesheet" type="text/css" />
-    </head>
+    <link href="/main.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript">
+        window.GUMLET_CONFIG = {
+            hosts: [{
+                current: "digglu.gumlet.io",
+                gumlet: "digglu.gumlet.io"
+            }],
+            auto_webp: true,
+        };
+        (function(){d=document;s=d.createElement("script");s.src="https://cdn.jsdelivr.net/npm/gumlet.js@2.2/dist/gumlet.min.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();
+    </script>
+</head>
 
 <body class="min-h-screen bg-base-200">
 
@@ -78,9 +89,8 @@ export const buildPage = (page: Page) => {
                     <!-----------------------
                     Error View container
                     ------------------------>
-                    <div id="error_container" class="${
-											page.error ? '' : 'hidden'
-										}"> ${errorCard(page.error)} </div>
+                    <div id="error_container" class="${page.error ? '' : 'hidden'
+        }"> ${errorCard(page.error)} </div>
 
                     <!-----------------------
                     Main Page Content

@@ -28,7 +28,7 @@ export const showHome = async (ctx: Context): Promise < Response > => {
         error: null,
     };
 
-    return new Response(buildPage(page), {
+    return new Response(buildPage(ctx, page), {
         status: 200,
         headers: ctx.res.headers
     });

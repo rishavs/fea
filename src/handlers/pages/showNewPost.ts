@@ -111,5 +111,5 @@ export const showNewPost = async (ctx: Context): Promise<Response> => {
                 
     </article>
     `
-    return new Response(buildPage(page), { headers: ctx.res.headers });
+    return new Response(buildPage(ctx, page), { headers: ctx.res.headers });
 }

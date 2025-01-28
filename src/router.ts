@@ -15,7 +15,7 @@ export const route = async (request: Request, env: Env) => {
     // Handle static assets
     // ------------------------------------------
     if (url.pathname.startsWith("/pub")) {
-        return env.ASSETS.fetch(request);
+        return env.STATIC_FILES.fetch(request);
     }
 
     let ctx: Context = {
@@ -117,6 +117,6 @@ export const route = async (request: Request, env: Env) => {
             content: '',
             error: serverError,
         }        
-        return new Response(buildPage(page), { status: serverError.code, headers: ctx.res.headers });
+        return new Response(buildPage(ctx, page), { status: serverError.code, headers: ctx.res.headers });
     }
 };

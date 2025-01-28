@@ -1,15 +1,5 @@
 import { route } from "./router";
 
-// Code to run only once when the server starts
-// Later we can move items like route building, db connection, etc. here
-( 
-	async () => {
-		// Add your initialization code here
-    	console.log("Server is starting...");
-
-	}
-)();
-
 export default {
 	/**
 	 * This is the standard fetch handler for a Cloudflare Worker
