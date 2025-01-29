@@ -2,7 +2,9 @@ export const postsListCard = () => {
     return /*html*/ `
 <li class="list-row">
     <button class="btn h-36"> 999 digs</button>
-    <div><img class="size-36 rounded-box" src="https://img.daisyui.com/images/profile/demo/3@94.webp" /></div>
+    <div class="size-36">
+        <img class="rounded-box" data-src="https://digglu.gumlet.io/default_${Math.floor(Math.random() * 30 - 10 + 1) + 10}.png" alt="Gumlet Logo">
+    </div>
     <div class="list-col-grow">
         <div>Sabrino Gardener</div>
         <div class="text-xs uppercase font-semibold opacity-60">Cappuccino</div>

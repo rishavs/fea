@@ -1,7 +1,7 @@
 export const header = () => {
     return /*html*/ `
 <div class="navbar-start gap-2">
-    <label for="left-sidebar" class="btn btn-circle swap swap-rotate lg:hidden">
+    <label for="left-sidebar" class="btn btn-square btn-soft swap swap-rotate lg:hidden">
         <!-- this hidden checkbox controls the state -->
         <input type="checkbox" />
 
@@ -15,16 +15,8 @@ export const header = () => {
             <polygon points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49" />
         </svg>
     </label>
-    <!-- <a href='/' class="btn btn-ghost text-3xl">Digglu</a> -->
-    <a class="min-w-xs btn p-0 lg:btn-lg text-2xl lg:text-4xl drop-shadow bg-gradient-to-r from-error to-warning text-transparent bg-clip-text" href="/">
-        <div class="avatar hidden">
-                <div class="w-12 lg:w-16">
-                    <img src="/avatars/32606955_7942348.jpg" alt="logo" loading="lazy"/>
-                    <img data-src="https://digglu.gumlet.io/default_01.png" alt="Gumlet Logo">
-                </div>
-            </div>
-        Digglu
-    </a>
+    <a class="btn btn-soft link-hover bg-linear-to-r from-secondary to-warning bg-clip-text text-transparent text-2xl">Digglu</a>
+
 </div>
 
 <div class="navbar-center gap-2 items-center"></div>

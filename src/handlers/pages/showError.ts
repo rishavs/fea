@@ -1,6 +1,7 @@
 
 import { Context, Page, ServerError, ServerErrorHeaderType, ServerErrorMessages } from "../../defs";
 import { buildPage } from "../../views/buildPage";
+import { errorCard } from "../../views/errorCard";
 
 
 export const showError = async (ctx: Context): Promise<Response> => {
@@ -20,9 +21,8 @@ export const showError = async (ctx: Context): Promise<Response> => {
 
     // Else, render a generic error page
     let page: Page = {
-        title: `Error: ${ errorHeader }`,
-        content: '',
-        error: sError,
+        title: `Error: ${errorHeader}`,
+        content: errorCard(sError),
     }
 
     return new Response(buildPage(ctx, page), { headers: ctx.res.headers });

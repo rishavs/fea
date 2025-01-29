@@ -168,7 +168,6 @@ export type Context = {
 export type Page = {
     title: string,
     content: string,
-    error: ServerError | null,
 }
 
 // ---------------------------------------

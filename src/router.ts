@@ -5,6 +5,7 @@ import { PostCategories } from "../pub/sharedDefs";
 import { buildPage } from "./views/buildPage";
 import { customAlphabet } from "nanoid";
 import { getUserFromSession } from "./handlers/helpers/getUserFromSession";
+import { errorCard } from "./views/errorCard";
 
 
 // Main route function
@@ -114,8 +115,7 @@ export const route = async (request: Request, env: Env) => {
         // Else, render the error page in situ
         let page: Page = {
             title: serverError.header,
-            content: '',
-            error: serverError,
+            content: errorCard(serverError),
         }        
         return new Response(buildPage(ctx, page), { status: serverError.code, headers: ctx.res.headers });
     }
