@@ -140,10 +140,14 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
 
         console.log(`user doesn't exist`)
 
+        // Choose a random avatar
+        let avatarNumber = Math.floor(Math.random() * (30 - 1 + 1)) + 1
+        let avatarURL = `https://images.digglu.com/default_${avatarNumber < 10 ? "0": ""}${avatarNumber}.png`
+         
         // create new user with default values
         user.slug           = getRandomSlug()
         user.name           = "Nony Mouse"
-        user.thumb          = ctx.env.SUPABASE_URL + '/storage/v1/object/public/avatars/default-0' + (Math.floor(Math.random() * (6 - 1 + 1)) + 1);
+        user.thumb          = avatarURL;
         user.honorific      = "Mx"
         user.flair          = "Nony is not a Mouse"
         user.role           = "user"

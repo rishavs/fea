@@ -6,7 +6,7 @@ import {
 export const freModal = () => {
     return /*html*/ `
 <!-- Open the modal using ID.showModal() method -->
-<dialog open id="fre_modal" class="modal modal-bottom lg:modal-middle border border-base-300">
+<dialog id="fre_modal" class="modal modal-bottom lg:modal-middle border border-base-300">
     <div class="modal-box flex flex-col">
         <h3 class="font-bold text-lg text-center mt-16">Welcome to Digglu!</h3>
         <p class="my-4">Let's get you setup. You can update your profile here, or anytime later in the Profiles page.</p>

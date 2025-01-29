@@ -25,7 +25,6 @@ export const showHome = async (ctx: Context): Promise < Response > => {
         ${postsListCard()}
     </ul>
     `,
-        error: null,
     };
 
     return new Response(buildPage(ctx, page), {
