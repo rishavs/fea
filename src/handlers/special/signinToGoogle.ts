@@ -6,12 +6,12 @@ export const signinToGoogle = async (ctx: Context) : Promise<Response> => {
 
     // TODO - protect from abuse of just filling up the db with sessions
 
-    // ------------------------------------------
-    // check that data exists
-    // ------------------------------------------
-    if (!ctx.req.cookies.D_SID) {
-        throw new ServerError("InvalidSession", "The session info cookie is missing")
-    }
+    // // ------------------------------------------
+    // // check that data exists
+    // // ------------------------------------------
+    // if (!ctx.req.cookies.D_SID) {
+    //     throw new ServerError("InvalidSession", "The session info cookie is missing")
+    // }
     // if (!ctx.req.cookies.D_IS_SIGNEDIN) {
     //     throw new ServerError("InvalidSession", "The isSignedIn flag cookie is missing")
     // }
@@ -24,7 +24,6 @@ export const signinToGoogle = async (ctx: Context) : Promise<Response> => {
     let nonce = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 32)()
     let prevURL = ctx.req.raw.headers.get("Referer") || "/"
     console.log("Referred from:", ctx.req.raw.headers.get("Referer"))
-
 
     const resAddSecInfoToSession = await ctx.db.from('sessions')
     .update({

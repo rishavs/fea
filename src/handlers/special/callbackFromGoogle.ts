@@ -208,20 +208,19 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
 
     ctx.res.headers.append('Set-Cookie', 
         `D_SID=${updateSession.data[0].id}; Max-Age=${Settings.maxSessionAge}; path=/; HttpOnly; Secure; SameSite=Strict;`);
-    
-    // // ------------------------------------------
-    // // Sync the user details with the browser
-    // // ------------------------------------------
-    // // Remove the ids from the user object
-    // delete user.id
-    // delete user.google_id
-    // delete user.apple_id
-
-    // // send the user object in the cookie
-    // let userEncoded = encodeURIComponent(JSON.stringify(user))
-    // console.log("User Encoded", userEncoded)
-    // ctx.res.headers.append('Set-Cookie', 
-    //     `D_SYNC_USER=${userEncoded}; path=/; Secure; SameSite=Strict;`)
+    ctx.res.headers.append('Set-Cookie',
+        `D_USER_INFO=${encodeURIComponent(JSON.stringify({
+            is_signed_in    : true,
+            slug            : user.slug,
+            name            : user.name,
+            thumb           : user.thumb,
+            level           : user.level,
+            stars           : user.stars,
+            creds           : user.creds,
+            gil             : user.gil,
+            flair           : user.flair,
+            ext_id          : user.ext_id,
+        }))}; path=/; Secure; SameSite=Strict;`);
 
     // ------------------------------------------
     // Redirect to the original page

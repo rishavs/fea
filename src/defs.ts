@@ -34,7 +34,16 @@ const setRoute = (
 }
 
 // Define routes
-export const routes: AppRoute[] = [
+export const apiRoutes: AppRoute[] = [
+    // dev routes
+    // setRoute('GET', '/query', ['anonymous'], runDBQuery),
+
+    // API routes
+    setRoute('POST', `/api/save-user-demographic-info`, ['anonymous'], addUserInfoToSession),
+    setRoute('POST', `/api/update-user-details`, ['user', 'moderator', 'admin'], updateUserDetails),
+    // setRoute('POST', `/api/save-new-post`, ['user', 'moderator', 'admin'], saveNewPost),
+];
+export const pageRoutes: AppRoute[] = [
     // dev routes
     // setRoute('GET', '/query', ['anonymous'], runDBQuery),
 
@@ -47,11 +56,7 @@ export const routes: AppRoute[] = [
     setRoute('GET', `/signin/google`, ['anonymous'], signinToGoogle),
     setRoute('GET', `/callback/google`, ['anonymous'], callbackFromGoogle),
     setRoute('GET', `/signout`, ['user', 'moderator', 'admin'], signout),
-    
-    // API routes
-    setRoute('POST', `/api/save-user-demographic-info`, ['anonymous'], addUserInfoToSession),
-    setRoute('POST', `/api/update-user-details`, ['user', 'moderator', 'admin'], updateUserDetails),
-    // setRoute('POST', `/api/save-new-post`, ['user', 'moderator', 'admin'], saveNewPost),
+
     // Dynamic error routes
     setRoute('GET', `/error/:id`, ['anonymous'], showError),
     
@@ -77,25 +82,25 @@ export const Settings = {
 // Server Messages/Triggers
 // ---------------------------------------
 export const ServerErrorMessages = {
+    MissingSession: {
+        code: 401,
+        header: "Missing Session",
+        userMsg: "Unable to login. Please delete all cookies and try again"
+    },
     InvalidSession: {
         code: 401,
         header: "Invalid Session",
         userMsg: "Unable to login. Please delete all cookies and try again"
     },
-    GoogleAuthError: {
-        code: 503,
-        header: "Google Auth Error",
-        userMsg: "Unable to signin using the Google account. Please delete all cookies and try again later"
+    UnauthorizedAccess: {
+        code: 401,
+        header: "Unauthorized Access",
+        userMsg: "Access to this resource is not allowed"
     },
     InvalidRequestData: {
         code: 400,
         header: "Invalid Request Data",
         userMsg: "Please check the form data and try again"
-    },
-    UnauthorizedAccess: {
-        code: 401,
-        header: "Unauthorized Access",
-        userMsg: "Access to this resource is not allowed"
     },
     PageNotFound: {
         code: 404,
@@ -106,6 +111,11 @@ export const ServerErrorMessages = {
         code: 500,
         header: "Internal Server Error",
         userMsg: `Oh no! You just broke the internets! <br> But don't worry. We have our best hamsters on the job`
+    },
+    GoogleAuthError: {
+        code: 503,
+        header: "Google Auth Error",
+        userMsg: "Unable to signin using the Google account. Please delete all cookies and try again later"
     },
     ServiceUnavailable: {
         code: 503,
