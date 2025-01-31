@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { NewPostTypes, PostCategories, UserPronouns } from "../pub/sharedDefs";
+// import { NewPostTypes, PostCategories } from "../pub/sharedDefs";
 import { addUserInfoToSession } from "./handlers/apis/addUserInfoToSession";
 import { showError } from "./handlers/pages/showError";
 import { showHome } from "./handlers/pages/showHome";
@@ -187,6 +187,7 @@ export type Page = {
 // ---------------------------------------
 type UserRoles = 'admin' | 'moderator' | 'user' | 'anonymous'
 type UserLevels = 'leaf' | 'wood' | 'pebble' | 'rock' | 'copper' | 'silver' | 'gold' | 'mithril'
+type UserPronouns = 'None' | 'He/Him' | 'She/Her' | 'They/Them'
 
 export type User = {
     id?: string,
@@ -197,7 +198,7 @@ export type User = {
     slug: string,
     name: string,
     thumb: string,
-    pronouns: (typeof UserPronouns)[keyof typeof UserPronouns]
+    pronouns: UserPronouns,
     honorific: string,
     flair: string,
     role: UserRoles,
@@ -215,11 +216,20 @@ export type User = {
     updated_at?: Date,
     deleted_at?: Date,
 }
+export const UserSchema = {
+	nameMinLength : 4,
+	nameMaxLength : 32,
+	slugMinLength : 8,
+	slugMaxLength : 64,
+	thumbMinSize  : 1,
+	thumbMaxSize  : 1024 * 1024,
+	thumbFileTypes: ["image/jpeg", "image/png", "image/webp"],
+}
 
 export type UserFREDetails = {
     name: string,
     thumb: string,
-    pronouns: (typeof UserPronouns)[keyof typeof UserPronouns]
+    pronouns: UserPronouns,
 }
 
 export type UserClientInfo = {
@@ -248,14 +258,36 @@ export type UserClientInfo = {
 }
 
 // ---------------------------------------
+// Images Definitions
+// ---------------------------------------
+export type ImageMetadata = {
+    type: 'avatar' | 'post' | 'thumb' | 'og' | 'icon',
+    width: number,
+    height: number,
+    size: number,
+    format: 'jpeg' | 'png' | 'webp',
+}
+
+// ---------------------------------------
 // Post Definitions
 // ---------------------------------------
+export type PostTypes = 'link' | 'text'
+export type PostSortings = 'magic' | 'digs' | 'discussions' | 'trending' | 'latest'
+export type PostCategories = 
+    | 'Meta'    | 'Science & Tech'  | 'Gaming'      | 'World News' 
+    | 'Sports'  | 'Business'        | 'Lifestyle'   | 'Entertainment' 
+    | 'Funny'   | 'Cute Stuff'      | 'Everything Else'
+
+export type PostReportReason = 
+    |'Harassment' | 'Threat of violance' | 'Violates community guidelines' 
+    | 'Spam' | 'Sharing personal information' | 'Self harm' | 'Illegal activity'
+
 export type Post = {
     id: string,
     authorId: string,
     slug: string,
-    category: (typeof PostCategories)[keyof typeof PostCategories]
-    type: (typeof NewPostTypes)[keyof typeof NewPostTypes]
+    category: PostCategories,
+    type: PostTypes,
     title: string,
     link: string,
     thumb: string,
@@ -282,13 +314,6 @@ export type Post = {
     deletedAt?: Date,
 }
 
-export type PostLinkBodyImage = {
-    src: string;
-    width?: number;
-    height?: number;
-    area?: number;
-};
-
 export type PostLinkOGModel = {
     title?: string;
     desc?: string;
@@ -308,3 +333,14 @@ export const PostLinkOGSchema = {
     iconURLMaxLength: 256,
     bodyImageURLMaxLength: 256,
 }
+export const NewPostSchema = {
+    titleMinLength : 16,
+    titleMaxLength : 256,
+
+    linkMinLength : 8,
+    linkMaxLength : 256,
+
+    contentMinLength : 32,
+    contentMaxLength : 4096,
+}
+

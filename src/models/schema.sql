@@ -54,8 +54,10 @@ CREATE TABLE IF NOT EXISTS sessions (
     nav_platform    text,
     nav_language    text,
     
+    signedin_at     timestamptz, -- when the authenticated session was initiated
+    sectoken_set_at     timestamptz, -- when the security token was set
+
     created_at    timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    signedin_at  timestamptz, -- when the authenticated session was initiated
     updated_at    timestamptz DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -27,8 +27,9 @@ export const signinToGoogle = async (ctx: Context) : Promise<Response> => {
 
     const resAddSecInfoToSession = await ctx.db.from('sessions')
     .update({
-        sec_token: secToken,
-        nonce: nonce,
+        sec_token       : secToken,
+        nonce           : nonce,
+        sectoken_set_at : new Date(),
         updated_at      : new Date(),
     })
     .eq('id', ctx.req.cookies['D_SID'])

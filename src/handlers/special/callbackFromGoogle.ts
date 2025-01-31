@@ -38,7 +38,7 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     // TODO - destroy session if it is more than n minutes old. Likely a sign of abuse
 
     let sessionDetailsFromDB = await ctx.db.from('sessions')
-    .select('sec_token,nonce,created_at')
+    .select('sec_token, nonce, sectoken_set_at')
     .eq('id', sid)
     .limit(1)
     .maybeSingle()
@@ -50,13 +50,13 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     }
 
     // if the session is older than 5 minutes, throw an error
-    // const sessionCreatedAt = new Date(sessionDetailsFromDB.data.created_at);
-    // const sessionExpiryTime = new Date(Date.now() - Settings.newSessionAge * 1000);
+    const sessionSecSetAt = new Date(sessionDetailsFromDB.data.sectoken_set_at);
+    const sessionExpiryTime = new Date(Date.now() - Settings.newSessionAge * 1000);
 
-    // if (sessionCreatedAt < sessionExpiryTime) {
-    //     console.log(`created_at: ${sessionCreatedAt.toISOString()}, now: ${new Date().toISOString()}`);
-    //     throw new ServerError("InvalidSession", "The session has expired");
-    // }
+    if (sessionSecSetAt < sessionExpiryTime) {
+        console.log(`created_at: ${sessionSecSetAt.toISOString()}, now: ${new Date().toISOString()}`);
+        throw new ServerError("InvalidSession", "The session has expired");
+    }
 
     let secTokenFromDB = sessionDetailsFromDB.data.sec_token as string
     let nonceFromDB = sessionDetailsFromDB.data.nonce as string

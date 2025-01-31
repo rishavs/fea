@@ -1,5 +1,4 @@
 import { Context, ServerError } from "../../defs"
-import { parseCookies } from "../../utils"
 
 export const signout = async (ctx: Context): Promise<Response> => {
 

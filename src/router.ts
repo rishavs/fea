@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { parseCookies } from "./utils";
-import { apiRoutes, Context, Page, pageRoutes, ServerError, Settings  } from "./defs";
-import { PostCategories } from "../pub/sharedDefs";
+import { apiRoutes, Context, Page, pageRoutes, PostCategories, ServerError, Settings  } from "./defs";
 import { buildPage } from "./views/buildPage";
 import { customAlphabet } from "nanoid";
 import { getUserFromSession } from "./handlers/helpers/getUserFromSession";
@@ -114,8 +113,8 @@ export const route = async (request: Request, env: Env) => {
             if (addNewSession.error) {
                 throw new ServerError("InternalServerError", JSON.stringify(addNewSession.error))
             }
-            // console.log (`session created in db: ${JSON.stringify(addNewSession.data)}`)
             ctx.res.headers.append('Set-Cookie', `D_SID=${addNewSession.data[0].id}; Max-Age=${Settings.maxSessionAge}; Path=/; Secure; HttpOnly; SameSite=Strict`)
+            ctx.res.headers.append('Set-Cookie', `D_SEND_USER_INFO=true; Path=/; Secure; SameSite=Strict`)
         }
 
         // ------------------------------------------
@@ -167,8 +166,7 @@ export const route = async (request: Request, env: Env) => {
                 ctx.req.params = match.pathname.groups;
                 ctx.req.allow = allow;
 
-                if (ctx.req.params.cat && 
-                    !Object.keys(PostCategories).includes(ctx.req.params.cat)
+                if (ctx.req.params.cat && Object.values(PostCategories).includes(ctx.req.params.cat as PostCategories)
                 ) {
                     throw new ServerError("PageNotFound", "Error 404: Invalid Category: " + ctx.req.params.cat)
                 }

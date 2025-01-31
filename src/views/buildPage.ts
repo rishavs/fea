@@ -75,7 +75,7 @@ export const buildPage = (ctx: Context, page: Page) => {
             <!-- right drawer -->
             <div class="drawer drawer-end lg:drawer-open">
                 <input id="right-sidebar" type="checkbox" class="drawer-toggle" />
-                <div class="drawer-content flex flex-col items-center justify-center">
+                <div class="drawer-content flex flex-col items-center justify-center border border-base-300">
 
                     <!-----------------------
                     Header Content
