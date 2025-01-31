@@ -10,6 +10,8 @@ import { showUserDetails } from "./handlers/pages/showUserDetails";
 import { callbackFromGoogle } from "./handlers/special/callbackFromGoogle";
 import { signinToGoogle } from "./handlers/special/signinToGoogle";
 import { signout } from "./handlers/special/signout";
+import { saveNewPost } from "./handlers/apis/saveNewPost";
+import { updateUserDetails } from "./handlers/apis/updateUserDetails";
 
 // ---------------------------------------
 // App Routes
@@ -48,7 +50,7 @@ export const routes: AppRoute[] = [
     
     // API routes
     setRoute('POST', `/api/save-user-demographic-info`, ['anonymous'], addUserInfoToSession),
-    // setRoute('POST', `/api/update-user-details`, ['user', 'moderator', 'admin'], updateUserDetails),
+    setRoute('POST', `/api/update-user-details`, ['user', 'moderator', 'admin'], updateUserDetails),
     // setRoute('POST', `/api/save-new-post`, ['user', 'moderator', 'admin'], saveNewPost),
     // Dynamic error routes
     setRoute('GET', `/error/:id`, ['anonymous'], showError),
@@ -202,6 +204,12 @@ export type User = {
     created_at?: Date,
     updated_at?: Date,
     deleted_at?: Date,
+}
+
+export type UserFREDetails = {
+    name: string,
+    thumb: string,
+    pronouns: (typeof UserPronouns)[keyof typeof UserPronouns]
 }
 
 export type UserClientInfo = {

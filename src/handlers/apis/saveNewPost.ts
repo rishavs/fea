@@ -5,14 +5,13 @@ import { getRandomSlug } from "../slug";
 import { getOGDataFromURL } from "../helpers/getOGDataFromURL";
 
 export const saveNewPost = async (ctx: Context): Promise<Response> => {
-    // check for user already done, so no new code required
-    // console.log("User: ", ctx.user);
     
     // ------------------------------------------
     // Parse incoming request & validate data
     // ------------------------------------------
     const formData = await ctx.req.raw.formData();
     console.log("Form Data: ", formData);
+    console.log("Form Data as Object: ", Object.fromEntries(formData.entries()));
 
     let post = {} as Post
     post.category   = formData.get('category') as string
@@ -22,32 +21,30 @@ export const saveNewPost = async (ctx: Context): Promise<Response> => {
     post.link       = formData.get('content') as string
     post.isAnonymous= formData.get('is_nony') ? true : false
 
-
     console.log("POST: ", post)
 
-
-    const postCat = formData.get('category') as (typeof PostCategories)[keyof typeof PostCategories]
-    const postTitle = formData.get('title') as string
-    const postContent = formData.get('content') as string
-    const postIsLink = formData.get('is_link') as 'on' | null
-    const postLink = formData.get('link') as string
-    const postIsNony = formData.get('is_nony') as 'on' | null
+    const postCat       = formData.get('category') as (typeof PostCategories)[keyof typeof PostCategories]
+    const postTitle     = formData.get('title') as string
+    const postContent   = formData.get('content') as string
+    const postIsLink    = formData.get('is_link') as 'on' | null
+    const postLink      = formData.get('link') as string
+    const postIsNony    = formData.get('is_nony') as 'on' | null
 
     const postExtId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 32)()
 
      // Validate form data
      if (!postTitle || postTitle.length < NewPostSchema.titleMinLength || postTitle.length > NewPostSchema.titleMaxLength) {
-        throw new ServerError(400, "Invalid post title");
+        throw new ServerError("InvalidRequestData", "Invalid post title");
     }
 
     if (!postContent || postContent.length < NewPostSchema.contentMinLength || postContent.length > NewPostSchema.contentMaxLength) {
-        throw new ServerError(400, "Invalid post content");
+        throw new ServerError("InvalidRequestData", "Invalid post content");
     }
 
     if (postIsLink) {
         let _ = new URL(postLink)
         if (!postLink || postLink.length < NewPostSchema.linkMinLength || postLink.length > NewPostSchema.linkMaxLength) {
-            throw new ServerError(400, "Invalid post link url");
+            throw new ServerError("InvalidRequestData", "Invalid post link");
         }
     }
 

@@ -1,5 +1,5 @@
 import { customAlphabet } from "nanoid";
-import { Context, ServerError } from "../../defs";
+import { Context, ServerError, UserFREDetails } from "../../defs";
 import { UserControlsSchema, UserPronouns } from "../../../pub/sharedDefs";
 
 export const updateUserDetails = async (ctx: Context): Promise<Response> => {
@@ -7,6 +7,8 @@ export const updateUserDetails = async (ctx: Context): Promise<Response> => {
     // Parse the incoming request as FormData
     const formData = await ctx.req.raw.formData();
     console.log("Form Data: ", formData);
+
+    // const freUser = Object.fromEntries(formData.entries()) as UserFREDetails
  
     const name = formData.get('name') as string
     const thumb = formData.get('thumb') as File
@@ -21,8 +23,6 @@ export const updateUserDetails = async (ctx: Context): Promise<Response> => {
         return Response.redirect(ctx.req.raw.headers.get('Referer') || '/', 303);
     }
 
-    // return new Response("OK", { headers: ctx.res.headers });
-
     // Validate form data
     // Required fields: name, slug, pronouns
     if (name.length >= UserControlsSchema.nameMinLength
@@ -31,48 +31,36 @@ export const updateUserDetails = async (ctx: Context): Promise<Response> => {
     ) {
         ctx.req.user!.name = name;
     } else {
-        throw new ServerError(400,"User name doesn't meets the schema requirements");
+        throw new ServerError("InvalidRequestData", "User name doesn't meets the schema requirements");
     }
 
     // Validate pronouns
     if (Object.values(UserPronouns).includes(pronouns)) {
         ctx.req.user!.pronouns = pronouns;
     } else {
-        throw new ServerError(400, "User pronouns doesn't meets the schema requirements");
+        throw new ServerError("InvalidRequestData", "User pronouns doesn't meets the schema requirements");
     }
 
-  
-    // // Optional fields: thumb
+    // Optional fields: thumb
     if (thumb) {
+        console.log("Uploading Thumb file to R2: ", thumb);
         if (thumb.size > UserControlsSchema.thumbMinSize
             && thumb.size < UserControlsSchema.thumbMaxSize
             && UserControlsSchema.thumbFileTypes.includes(thumb.type)
         ) {
-            let fileId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 32)()
+            let fileId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 32)() 
+                + "__" + encodeURIComponent(thumb.name)
+                
+            let imgUpload = await ctx.env.STORAGE.put(fileId, thumb, {
+                httpMetadata: { "contentType": thumb.type}
+            })
+            if(!imgUpload) throw new ServerError("ServiceUnavailable", "Failed to upload thumb file to R2")
+            console.log("R2 object:", imgUpload)
 
-            const ResUploadThumb = await ctx.db.storage
-                .from('avatars')
-                .upload(fileId, thumb, {
-                    cacheControl: '3600',
-                    upsert: false
-                })
-
-            if (ResUploadThumb.error) throw ResUploadThumb.error
-            
-            console.log("Thumb uploaded to storage: ", ResUploadThumb.data)
-            // Get the thumb URL
-            const CFRespData = await ctx.db.storage
-                .from('avatars')
-                .getPublicUrl(fileId)
-
-            console.log("Thumb URL: ", CFRespData.data.publicUrl)
-
-            // now we need to choose the variant ending in userthumb and save it in db
-            // and update the user object with the new image url
-            // let imgUrl = CFRespData.result.variants.find( (v: string) => v.endsWith('userthumb'));
-            ctx.req.user!.thumb = CFRespData.data.publicUrl;
+            let thumbURL = `https://images.digglu.com/${fileId}`
+            ctx.req.user!.thumb = thumbURL;
         } else {
-            throw new ServerError(400, "User thumb doesn't meets the schema requirements");
+            throw new ServerError("InvalidRequestData", "User thumb doesn't meets the schema requirements");
         }
     }
 

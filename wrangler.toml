@@ -16,9 +16,9 @@ binding = "STATIC_FILES"
 
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces
-[[kv_namespaces]]
-binding = "sessions"
-id = "0f19e949cec340108bfe5687d5570b4e"
+# [[kv_namespaces]]
+# binding = "sessions"
+# id = "0f19e949cec340108bfe5687d5570b4e"
 
 [build]
 command = "clear && npx tailwindcss -i ./src/style.css -o ./pub/main.css"
@@ -28,6 +28,7 @@ command = "clear && npx tailwindcss -i ./src/style.css -o ./pub/main.css"
 [[r2_buckets]]
 binding = 'STORAGE' # <~ valid JavaScript variable name
 bucket_name = 'assets'
+preview_bucket_name = 'assets'
 
 # Automatically place your workloads in an optimal location to minimize latency.
 # If you are running back-end logic in a Worker, running it closer to your back-end infrastructure
