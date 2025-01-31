@@ -18,9 +18,9 @@ export const signout = async (ctx: Context): Promise<Response> => {
 
     // delete all cookies
     ctx.res.headers.append('Set-Cookie', 
-        `D_SID=; path=/; HttpOnly; Secure; Expires=Thu, 01 Jan 1970 00:00:00 GMT;`);
+        `D_SID=; path=/; HttpOnly; Secure; Max-Age=0;`);
     ctx.res.headers.append('Set-Cookie', 
-        `D_IS_SIGNEDIN=; path=/; HttpOnly; Secure; Expires=Thu, 01 Jan 1970 00:00:00 GMT;`);
+        `D_USER_INFO=; path=/; Secure; Max-Age=0;`);
 
     ctx.res.headers.append('Location', '/')
     return new Response ('', {status: 303, headers: ctx.res.headers})

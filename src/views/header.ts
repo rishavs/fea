@@ -99,5 +99,7 @@ export const header = () => {
         </ul>
     </div>
 </div>
+<script>
+</script>
 `
 }

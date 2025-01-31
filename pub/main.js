@@ -9,12 +9,6 @@ const cookieExists = (name) => {
     )
 }
 
-const showErrorCard = async (code, header, details) => {
-    document.getElementById("error_code").innerText = code
-    document.getElementById("error_header").innerText = header
-    document.getElementById("error_details").innerText = details
-    document.getElementById("error_container").classList.remove("hidden")
-}
 
 // ---------------------------------------
 // Auth
@@ -132,7 +126,7 @@ signout_action.addEventListener("click", () => {
 // ---------------------------------------
 // Hydrate user profile components
 // ---------------------------------------
-if (localStorage.getItem('slug')) {
+if (app.user && app.user.is_signed_in) {
     // Hydrate the header
     document.querySelectorAll('[data-role="signedin_controls"]').forEach((el) => {
         el.classList.remove('hidden');
@@ -141,21 +135,18 @@ if (localStorage.getItem('slug')) {
         el.classList.add('hidden');
     })
 
-    let thumb = localStorage.getItem('thumb')
     document.querySelectorAll('[data-role="user-profile-img"]').forEach((el) => {
         // @ts-ignore
-        el.src = decodeURIComponent(thumb)
+        el.src = decodeURIComponent(app.user.thumb)
     })
 
-    let name = localStorage.getItem('name')
     document.querySelectorAll('[data-role="user-profile-name"]').forEach((el) => {
-        el.textContent = decodeURIComponent(name)
+        el.textContent = decodeURIComponent(app.user.name)
     })
 
-    let pronouns = localStorage.getItem('pronouns') === 'null' ? '' : localStorage.getItem('pronouns')
     document.querySelectorAll('[data-role="user-profile-pronouns"]').forEach((el) => {
         // @ts-ignore
-        el.textContent = decodeURIComponent(pronouns)
+        el.textContent = decodeURIComponent(app.user.pronouns)
     })
 }
 

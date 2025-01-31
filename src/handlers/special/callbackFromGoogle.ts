@@ -50,13 +50,13 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
     }
 
     // if the session is older than 5 minutes, throw an error
-    const sessionCreatedAt = new Date(sessionDetailsFromDB.data.created_at);
-    const sessionExpiryTime = new Date(Date.now() - Settings.newSessionAge * 1000);
+    // const sessionCreatedAt = new Date(sessionDetailsFromDB.data.created_at);
+    // const sessionExpiryTime = new Date(Date.now() - Settings.newSessionAge * 1000);
 
-    if (sessionCreatedAt < sessionExpiryTime) {
-        console.log(`created_at: ${sessionCreatedAt.toISOString()}, now: ${new Date().toISOString()}`);
-        throw new ServerError("InvalidSession", "The session has expired");
-    }
+    // if (sessionCreatedAt < sessionExpiryTime) {
+    //     console.log(`created_at: ${sessionCreatedAt.toISOString()}, now: ${new Date().toISOString()}`);
+    //     throw new ServerError("InvalidSession", "The session has expired");
+    // }
 
     let secTokenFromDB = sessionDetailsFromDB.data.sec_token as string
     let nonceFromDB = sessionDetailsFromDB.data.nonce as string
@@ -208,22 +208,20 @@ export const callbackFromGoogle = async (ctx: Context) : Promise<Response> => {
 
     ctx.res.headers.append('Set-Cookie', 
         `D_SID=${updateSession.data[0].id}; Max-Age=${Settings.maxSessionAge}; path=/; HttpOnly; Secure; SameSite=Strict;`);
-    ctx.res.headers.append('Set-Cookie', 
-        `D_IS_SIGNEDIN=true; Max-Age=${Settings.maxSessionAge}; Path=/; Secure; HttpOnly; SameSite=Strict`)
+    
+    // // ------------------------------------------
+    // // Sync the user details with the browser
+    // // ------------------------------------------
+    // // Remove the ids from the user object
+    // delete user.id
+    // delete user.google_id
+    // delete user.apple_id
 
-    // ------------------------------------------
-    // Sync the user details with the browser
-    // ------------------------------------------
-    // Remove the ids from the user object
-    delete user.id
-    delete user.google_id
-    delete user.apple_id
-
-    // send the user object in the cookie
-    let userEncoded = encodeURIComponent(JSON.stringify(user))
-    console.log("User Encoded", userEncoded)
-    ctx.res.headers.append('Set-Cookie', 
-        `D_SYNC_USER=${userEncoded}; path=/; Secure; SameSite=Strict;`)
+    // // send the user object in the cookie
+    // let userEncoded = encodeURIComponent(JSON.stringify(user))
+    // console.log("User Encoded", userEncoded)
+    // ctx.res.headers.append('Set-Cookie', 
+    //     `D_SYNC_USER=${userEncoded}; path=/; Secure; SameSite=Strict;`)
 
     // ------------------------------------------
     // Redirect to the original page

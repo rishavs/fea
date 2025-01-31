@@ -35,6 +35,34 @@ export const buildPage = (ctx: Context, page: Page) => {
         };
         (function(){d=document;s=d.createElement("script");s.src="https://cdn.jsdelivr.net/npm/gumlet.js@2.2/dist/gumlet.min.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();
     </script>
+
+    <script type="text/javascript">
+        // ---------------------------------------
+        // Create CLient side context
+        // ---------------------------------------
+        let app = {}
+        app.cookies = Object.fromEntries(
+            document.cookie
+            .split(';')
+            .map(cookie => cookie.trim().split('=')) // Trim whitespace and split
+            .map(([key, value]) => [key, decodeURIComponent(value)]) // Decode values
+        );
+        app.user = app.cookies['D_USER_INFO'] ? JSON.parse(app.cookies['D_USER_INFO']) : null;
+
+        // Methods
+        app.eatCookie = (cookieName) => {
+            if (app.cookies[cookieName]) {
+                document.cookie = cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            }
+        }
+        app.showErrorCard = (code, header, details) => {
+            document.getElementById("error_code").innerText = code
+            document.getElementById("error_header").innerText = header
+            document.getElementById("error_details").innerText = details
+            document.getElementById("error_container").classList.remove("hidden")
+        }
+
+    </script>
 </head>
 
 <body class="min-h-screen bg-base-200">

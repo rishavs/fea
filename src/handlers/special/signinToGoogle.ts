@@ -12,12 +12,12 @@ export const signinToGoogle = async (ctx: Context) : Promise<Response> => {
     if (!ctx.req.cookies.D_SID) {
         throw new ServerError("InvalidSession", "The session info cookie is missing")
     }
-    if (!ctx.req.cookies.D_IS_SIGNEDIN) {
-        throw new ServerError("InvalidSession", "The isSignedIn flag cookie is missing")
-    }
-    if (ctx.req.cookies.D_IS_SIGNEDIN === 'true') {
-        throw new ServerError("InvalidSession", "The user is already signed in")
-    }
+    // if (!ctx.req.cookies.D_IS_SIGNEDIN) {
+    //     throw new ServerError("InvalidSession", "The isSignedIn flag cookie is missing")
+    // }
+    // if (ctx.req.cookies.D_IS_SIGNEDIN === 'true') {
+    //     throw new ServerError("InvalidSession", "The user is already signed in")
+    // }
 
     let sid = ctx.req.cookies.D_SID
     let secToken = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 32)()
