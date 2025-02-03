@@ -130,24 +130,24 @@ export const ServerErrorMessages = {
 } as const;
 export type ServerErrorHeaderType = keyof typeof ServerErrorMessages;
 export class ServerError extends Error {
-    code: number;
-    header: string;
-    userMsg: string;
-    toErrorPage: boolean;
+    code        : number;
+    header      : string;
+    userMsg     : string;
+    toErrorPage : boolean;
 
     constructor(
-        header: ServerErrorHeaderType,
-        msg: string,
+        header      : ServerErrorHeaderType,
+        msg         : string,
         toErrorPage?: boolean
     ) {
         super(msg); // error details is stored in the message property
-        this.header = ServerErrorMessages[header].header;
-        this.code = ServerErrorMessages[header].code;
-        this.userMsg = ServerErrorMessages[header].userMsg;
+        this.header         = ServerErrorMessages[header].header;
+        this.code           = ServerErrorMessages[header].code;
+        this.userMsg        = ServerErrorMessages[header].userMsg;
 
-        this.toErrorPage = toErrorPage ? toErrorPage : false;
+        this.toErrorPage    = toErrorPage ? toErrorPage : false;
 
-        this.name = "Server Error " + this.code + ": " + this.header;
+        this.name           = "Server Error " + this.code + ": " + this.header;
     }
 }
 
@@ -185,36 +185,40 @@ export type Page = {
 // ---------------------------------------
 // User Definitions
 // ---------------------------------------
-type UserRoles = 'admin' | 'moderator' | 'user' | 'anonymous'
-type UserLevels = 'leaf' | 'wood' | 'pebble' | 'rock' | 'copper' | 'silver' | 'gold' | 'mithril'
-type UserPronouns = 'None' | 'He/Him' | 'She/Her' | 'They/Them'
+export const UserRolesList = ['admin', 'moderator', 'user', 'anonymous'] as const;
+export type UserRole = (typeof UserRolesList)[number];
+
+export const UserLevelsList = ['leaf', 'wood', 'pebble', 'rock', 'copper', 'silver', 'gold', 'mithril'] as const;
+export type UserLevel = (typeof UserLevelsList)[number];
+export const UserPronounsList = ['None', 'He/Him', 'She/Her', 'They/Them'] as const;
+export type UserPronoun = (typeof UserPronounsList)[number];
 
 export type User = {
-    id?: string,
-    google_id?: string,
-    apple_id?: string,
-    ext_id: string,
+    id?                 : string,
+    google_id?          : string,
+    apple_id?           : string,
+    ext_id              : string,
 
-    slug: string,
-    name: string,
-    thumb: string,
-    pronouns: UserPronouns,
-    honorific: string,
-    flair: string,
-    role: UserRoles,
-    level: UserLevels,
-    stars: number,
-    creds: number,
-    gil: number,
+    slug                : string,
+    name                : string,
+    thumb               : string,
+    pronouns            : UserPronoun,
+    honorific           : string,
+    flair               : string,
+    role                : UserRole,
+    level               : UserLevel,
+    stars               : number,
+    creds               : number,
+    gil                 : number,
 
-    banned_at?: Date,
-    banned_till?: Date,
-    banned_note?: string,
-    total_banned_count?: number,
+    banned_at?          : Date,
+    banned_till?        : Date,
+    banned_note?        : string,
+    total_banned_count? : number,
 
-    created_at?: Date,
-    updated_at?: Date,
-    deleted_at?: Date,
+    created_at?         : Date,
+    updated_at?         : Date,
+    deleted_at?         : Date,
 }
 export const UserSchema = {
 	nameMinLength : 4,
@@ -224,12 +228,6 @@ export const UserSchema = {
 	thumbMinSize  : 1,
 	thumbMaxSize  : 1024 * 1024,
 	thumbFileTypes: ["image/jpeg", "image/png", "image/webp"],
-}
-
-export type UserFREDetails = {
-    name: string,
-    thumb: string,
-    pronouns: UserPronouns,
 }
 
 export type UserClientInfo = {
@@ -260,87 +258,144 @@ export type UserClientInfo = {
 // ---------------------------------------
 // Images Definitions
 // ---------------------------------------
+export const ImageTypesList = {
+    avatar  : "avatar",
+    post    : "post",
+    thumb   : "thumb",
+    og      : "og",
+    icon    : "icon",
+}
+export type ImageType = (typeof ImageTypesList)[keyof typeof ImageTypesList];
+
+export const ImageMimeTypeList = {
+    jpeg    : "image/jpeg",
+    png     : "image/png",
+    webp    : "image/webp",
+}
+export type ImageMimeType = (typeof ImageMimeTypeList)[keyof typeof ImageMimeTypeList];
+
 export type ImageMetadata = {
-    type: 'avatar' | 'post' | 'thumb' | 'og' | 'icon',
-    width: number,
-    height: number,
-    size: number,
-    format: 'jpeg' | 'png' | 'webp',
+    type    : ImageType,
+    width   : number,
+    height  : number,
+    size    : number,
+    format  : ImageMimeType,
 }
 
 // ---------------------------------------
 // Post Definitions
 // ---------------------------------------
-export type PostTypes = 'link' | 'text'
-export type PostSortings = 'magic' | 'digs' | 'discussions' | 'trending' | 'latest'
-export type PostCategories = 
-    | 'Meta'    | 'Science & Tech'  | 'Gaming'      | 'World News' 
-    | 'Sports'  | 'Business'        | 'Lifestyle'   | 'Entertainment' 
-    | 'Funny'   | 'Cute Stuff'      | 'Everything Else'
+export const PostSortingOrdersRec = {
+    magic       : 'Magic',
+    digs        : 'Digs',
+    discussions : 'Discussions',
+    trending    : 'Trending',
+    latest      : 'Latest',
+}
+export type PostSortingOrder = (typeof PostSortingOrdersRec)[keyof typeof PostSortingOrdersRec];
 
-export type PostReportReason = 
-    |'Harassment' | 'Threat of violance' | 'Violates community guidelines' 
-    | 'Spam' | 'Sharing personal information' | 'Self harm' | 'Illegal activity'
+export const PostTypesList = ['link', 'text'] as const;
+export type PostType = (typeof PostTypesList)[number];
 
+export const PostReportReasonsRec = {
+    harassment	: 'Harassment', 
+	violance	: "Threat of violance",
+    guidelines	: 'Violates community guidelines', 
+    spam		: 'Spam', 
+    dox			: 'Sharing personal information', 
+    harm		: 'Self harm', 
+    illegal		: 'Illegal activity'
+}
+export type PostReportReason = (typeof PostReportReasonsRec)[keyof typeof PostReportReasonsRec];
+
+export const PostCategoriesRec = {
+	meta 	: "Meta",
+	tech 	: "Science & Tech",
+	games 	: "Gaming",
+	world 	: "World News",
+	sport 	: "Sports",
+	biz 	: "Business",
+	life 	: "Lifestyle",
+	media 	: "Entertainment",
+	funny 	: "Funny",
+	cute 	: "Cute Stuff",
+	else 	: "Everything Else",
+}
+export type PostCategory = (typeof PostCategoriesRec)[keyof typeof PostCategoriesRec];
+
+export const PostLinkOGSchema = {
+    titleMaxLength          : 1024,
+    descMaxLength           : 4096,
+    urlMaxLength            : 256,
+    imageURLMaxLength       : 256,
+    iconURLMaxLength        : 256,
+    bodyImageURLMaxLength   : 256,
+}
+export const NewPostSchema = {
+    titleMinLength  : 16,
+    titleMaxLength  : 256,
+
+    linkMinLength   : 8,
+    linkMaxLength   : 256,
+
+    contentMinLength: 32,
+    contentMaxLength: 4096,
+}
 export type Post = {
-    id: string,
-    authorId: string,
-    slug: string,
-    category: PostCategories,
-    type: PostTypes,
-    title: string,
-    link: string,
-    thumb: string,
-    content: string,
-    displayScore: number,
+    id              : string,
+    authorId        : string,
+    slug            : string,
+    category        : PostCategory,
+    type            : PostType,
+    title           : string,
+    link            : string,
+    thumb           : string,
+    content         : string,
+    displayScore    : number,
 
-    ogTitle?: string,
-    ogDesc?: string,
-    ogImage?: string,
-    ogImageAlt?: string,
-    ogIcon?: string,
-    ogURL?: string,
+    ogTitle?        : string,
+    ogDesc?         : string,
+    ogImage?        : string,
+    ogImageAlt?     : string,
+    ogIcon?         : string,
+    ogURL?          : string,
 
-    bodyImage?: string,
+    bodyImage?      : string,
 
-    isLocked?: boolean,
-    lockedFor?: string,
-    isAnonymous: boolean
+    isLocked?       : boolean,
+    lockedFor?      : string,
+    isAnonymous     : boolean
 
-    createdAt?: Date,
-    updatedAt?: Date,
-    archivedAt?: Date,
-    lockedAt?: Date,
-    deletedAt?: Date,
+    createdAt?      : Date,
+    updatedAt?      : Date,
+    archivedAt?     : Date,
+    lockedAt?       : Date,
+    deletedAt?      : Date,
 }
 
 export type PostLinkOGModel = {
-    title?: string;
-    desc?: string;
-    image?: string;
-    imageAlt?: string;
-    icon?: string;
-    url?: string;
+    title?      : string;
+    desc?       : string;
+    image?      : string;
+    imageAlt?   : string;
+    icon?       : string;
+    url?        : string;
 
-    bodyImage?: string;
+    bodyImage?  : string;
 };
 
-export const PostLinkOGSchema = {
-    titleMaxLength: 1024,
-    descMaxLength: 4096,
-    urlMaxLength: 256,
-    imageURLMaxLength: 256,
-    iconURLMaxLength: 256,
-    bodyImageURLMaxLength: 256,
-}
-export const NewPostSchema = {
-    titleMinLength : 16,
-    titleMaxLength : 256,
 
-    linkMinLength : 8,
-    linkMaxLength : 256,
-
-    contentMinLength : 32,
-    contentMaxLength : 4096,
+// ---------------------------------------
+// Links Definitions
+// ---------------------------------------
+export const CommunityLinks = {
+	faqs 	: "FAQs",
+	rules 	: "Guidelines",
+	cont 	: "Contact Us",
 }
 
+export const LegalLinks = {
+	terms 	: "Terms of Use",
+	priv 	: "Privacy Policy",
+	cook 	: "Cookie Policy",
+}

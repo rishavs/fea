@@ -1,8 +1,8 @@
 import {
     CommunityLinks,
     LegalLinks,
-    PostCategories
-} from "../../pub/sharedDefs"
+    PostCategoriesRec
+} from "../defs";
 
 let navBuilder = (group: any) => {
 
@@ -25,7 +25,7 @@ export const drawer = () => {
             <summary class="group"> Category</summary>
             <ul class="flex flex-col gap-1 lg:gap-2">
                 <li><a data-role="drawer-link" class="hover:underline" href="/">All</a></li>
-                ${navBuilder(PostCategories)}
+                ${navBuilder(PostCategoriesRec)}
             </ul>
         </details>
     </li>

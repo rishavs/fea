@@ -1,7 +1,4 @@
-import {
-    UserControlsSchema,
-    UserPronouns
-} from '../../pub/sharedDefs';
+import { UserPronounsList, UserSchema } from "../defs";
 
 export const freModal = () => {
     return /*html*/ `
@@ -20,12 +17,12 @@ export const freModal = () => {
                 <label class="flex justify-between">
                     <legend class="fieldset-legend">Your display name</legend>
                     <span id="user_name_input_char_count" class="label">0/${
-                        UserControlsSchema.nameMaxLength
+                        UserSchema.nameMaxLength
                         } chars</span>
                 </label>
                 <input id="user_name_input" name="name" type="text" class="input input-bordered w-full" required minLength="${
-                        UserControlsSchema.nameMinLength
-                    }" maxLength="${UserControlsSchema.nameMaxLength}" />
+                        UserSchema.nameMinLength
+                    }" maxLength="${UserSchema.nameMaxLength}" />
                 <label class="flex justify-between">
                     <span class="fieldset-label">Only letters, numbers, and single spaces</span>
                     <span class="fieldset-label"></span>
@@ -51,7 +48,7 @@ export const freModal = () => {
                     <select id="user_pronouns_select" name="pronouns" class="select select-bordered w-1/2">
 
                         ${
-                        Object.values(UserPronouns)
+                        Object.values(UserPronounsList)
                         .map((item, i) => {
                         return `<option class=" text-xl">${item}</option>`;
                         })
@@ -74,12 +71,12 @@ export const freModal = () => {
     
     // Hydrate form
     user_name_input.value = app.user.name || "";
-    user_name_input_char_count.innerText = user_name_input.value.length + "/" + ${UserControlsSchema.nameMaxLength} + "chars";
+    user_name_input_char_count.innerText = user_name_input.value.length + "/" + ${UserSchema.nameMaxLength} + "chars";
     user_pronouns_select.value = app.user.pronouns === 'null' ? "None" : app.user.pronouns;
 
     // Setup Interactivity
     user_name_input.addEventListener("input", () => {
-        user_name_input_char_count.innerText = user_name_input.value.length + "/" + ${UserControlsSchema.nameMaxLength} + "chars"
+        user_name_input_char_count.innerText = user_name_input.value.length + "/" + ${UserSchema.nameMaxLength} + "chars"
         document.querySelectorAll('[data-role="user-profile-name"]').forEach((el) => {
             el.textContent = user_name_input.value;
         })

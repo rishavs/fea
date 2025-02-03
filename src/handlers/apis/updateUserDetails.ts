@@ -1,6 +1,5 @@
 import { customAlphabet } from "nanoid";
-import { Context, ServerError, UserFREDetails } from "../../defs";
-import { UserControlsSchema, UserPronouns } from "../../../pub/sharedDefs";
+import { Context, ServerError, UserPronoun, UserPronounsList, UserSchema } from "../../defs";
 
 export const updateUserDetails = async (ctx: Context): Promise<Response> => {
 
@@ -12,7 +11,7 @@ export const updateUserDetails = async (ctx: Context): Promise<Response> => {
  
     const name = formData.get('name') as string
     const thumb = formData.get('thumb') as File
-    const pronouns = formData.get('pronouns') as string
+    const pronouns = formData.get('pronouns') as UserPronoun
 
     // If data has not changed, return early
     if ( name === ctx.req.user!.name 
@@ -25,8 +24,8 @@ export const updateUserDetails = async (ctx: Context): Promise<Response> => {
 
     // Validate form data
     // Required fields: name, slug, pronouns
-    if (name.length >= UserControlsSchema.nameMinLength
-        && name.length <= UserControlsSchema.nameMaxLength
+    if (name.length >= UserSchema.nameMinLength
+        && name.length <= UserSchema.nameMaxLength
         // && namePattern.test(name)  
     ) {
         ctx.req.user!.name = name;
@@ -35,8 +34,8 @@ export const updateUserDetails = async (ctx: Context): Promise<Response> => {
     }
 
     // Validate pronouns
-    if (Object.values(UserPronouns).includes(pronouns)) {
-        ctx.req.user!.pronouns = pronouns;
+    if ((UserPronounsList).includes(pronouns)) {
+        ctx.req.user!.pronouns = pronouns as UserPronoun
     } else {
         throw new ServerError("InvalidRequestData", "User pronouns doesn't meets the schema requirements");
     }
@@ -44,9 +43,9 @@ export const updateUserDetails = async (ctx: Context): Promise<Response> => {
     // Optional fields: thumb
     if (thumb) {
         console.log("Uploading Thumb file to R2: ", thumb);
-        if (thumb.size > UserControlsSchema.thumbMinSize
-            && thumb.size < UserControlsSchema.thumbMaxSize
-            && UserControlsSchema.thumbFileTypes.includes(thumb.type)
+        if (thumb.size > UserSchema.thumbMinSize
+            && thumb.size < UserSchema.thumbMaxSize
+            && UserSchema.thumbFileTypes.includes(thumb.type)
         ) {
             let fileId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 32)() 
                 + "__" + encodeURIComponent(thumb.name)

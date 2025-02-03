@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { parseCookies } from "./utils";
-import { apiRoutes, Context, Page, pageRoutes, PostCategories, ServerError, Settings  } from "./defs";
+import { apiRoutes, Context, Page, pageRoutes, PostCategoriesRec, ServerError, Settings  } from "./defs";
 import { buildPage } from "./views/buildPage";
 import { customAlphabet } from "nanoid";
 import { getUserFromSession } from "./handlers/helpers/getUserFromSession";
@@ -166,8 +166,7 @@ export const route = async (request: Request, env: Env) => {
                 ctx.req.params = match.pathname.groups;
                 ctx.req.allow = allow;
 
-                if (ctx.req.params.cat && Object.values(PostCategories).includes(ctx.req.params.cat as PostCategories)
-                ) {
+                if (ctx.req.params.cat && !Object.keys(PostCategoriesRec).includes(ctx.req.params.cat)) {
                     throw new ServerError("PageNotFound", "Error 404: Invalid Category: " + ctx.req.params.cat)
                 }
                 // Note: all pages are public
@@ -195,6 +194,6 @@ export const route = async (request: Request, env: Env) => {
             title: serverError.header,
             content: errorCard(serverError),
         }        
-        return new Response(buildPage(ctx, page), { status: serverError.code, headers: ctx.res.headers });
+        return new Response(buildPage(ctx, page), { headers: ctx.res.headers });
     }
 };

@@ -1,4 +1,4 @@
-import { NewPostSchema, PostCategories } from '../../../pub/sharedDefs';
+import { NewPostSchema, PostCategoriesRec } from '../../defs';
 import { Context, Page } from '../../defs';
 import { buildPage } from '../../views/buildPage';
 
@@ -47,9 +47,9 @@ export const showNewPost = async (ctx: Context): Promise<Response> => {
 
                         <select id="post_category_select" class="select select-bordered w-full invalid:border-error" name="category" required>
                             <option class="text-2xl lg:text-lg" value="" selected disabled hidden>Select Post Category</option>
-                            ${Object.keys(PostCategories).map((cat) => {
-                                const key = cat as keyof typeof PostCategories;
-                                return /*html*/ `<option class="" value="${key}">${PostCategories[key]}</option>`;
+                            ${Object.keys(PostCategoriesRec).map((cat) => {
+                                const key = cat as keyof typeof PostCategoriesRec;
+                                return /*html*/ `<option class="" value="${key}">${PostCategoriesRec[key]}</option>`;
                                 }).join("")
                             }
                         </select>
