@@ -4,5 +4,23 @@
     exclude: rootscrollgutter;
     themes: light --default, dark --prefersdark, nord;
 }
+
+@theme {
+    /* --color-BOKKA-500: oklch(0.72 0.11 178); */
+    /* Primary brand color, The main color of your brand */
+    /* Digglu Blue */
+    --color-primary: 
+    --color-primary-content	
+
+    /* Secondary brand color, The optional, secondary color of your brand */
+    /* Digglu Yellow */
+    --color-secondary
+    --color-secondary-content
+
+    /* Accent brand color, The optional, accent color of your brand */
+    /* Digglu Pink */
+    --color-accent
+    --color-accent-content
+}
+
 @plugin "@tailwindcss/typography";
-@plugin "@tailwindcss/forms";

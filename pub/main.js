@@ -261,30 +261,3 @@ let fre_modal = document.getElementById('fre_modal');
 // // ---------------------------------------
 // // New Post page
 // // ---------------------------------------
-document.getElementById("post_type")?.addEventListener("click", async(e) => {
-    if (post_type.checked) {
-
-        post_link_controls.classList.remove("hidden")
-        post_link_input.required = true
-    } else {
-
-        post_link_controls.classList.add("hidden")
-        post_link_input.required = false
-    }
-
-})
-
-document.getElementById("post_link_input")?.addEventListener("input", async(e) => {
-    let numOfEnteredChars = post_link_input.value.length;
-    post_link_char_count.innerText = numOfEnteredChars + "/" + NewPostSchema.linkMaxLength + " chars";
-})
-
-document.getElementById("post_title_input")?.addEventListener("input", async(e) => {
-    let numOfEnteredChars = post_title_input.value.length;
-    post_title_char_count.innerText = numOfEnteredChars + "/" + NewPostSchema.titleMaxLength + " chars";
-})
-
-document.getElementById("post_content_textarea")?.addEventListener("input", async(e) => {
-    let numOfEnteredChars = post_content_textarea.value.length;
-    content_char_count.innerText = numOfEnteredChars + "/" + NewPostSchema.contentMaxLength + " chars";
-})

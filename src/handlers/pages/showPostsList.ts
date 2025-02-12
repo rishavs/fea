@@ -5,10 +5,25 @@ export const showPostsList = async (ctx: Context): Promise<Response> => {
     let url = new URL(ctx.req.url)
     let cat = url.pathname.split("/")[1]
     
-    let page: Page = {
-        title : `Viewing List of Posts`,
-        content: `<h1>Viewing Posts for cat ${cat}</h1>`,
-        error: null
-    }
+    let page = {} as Page
+    page.title = `Viewing List of Posts`
+    page.content = /*html*/ `
+<ul role="list" class="divide-y divide-slate-500 w-full">
+    ${postCard}
+    ${postCard}
+    ${postCard}
+    ${postCard}
+    ${postCard}
+    ${postCard}
+</ul>
+
+  `;
     return new Response(buildPage(ctx, page), { headers: ctx.res.headers });
 }
+
+let postCard = /*html*/ `
+    <li class="flex justify-between gap-x-6 py-5">
+
+    XXXX
+    </li>
+  `;

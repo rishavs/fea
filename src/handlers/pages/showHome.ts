@@ -13,10 +13,8 @@ export const showHome = async (ctx: Context): Promise < Response > => {
     let page: Page = {
         title: 'Home',
         content: /*html*/ `
-    <ul class="list w-full bg-base-200 shadow-md">
-
-        <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">Most played songs this week</li>
-
+    <ul class="list w-full bg-base-200 divide-y divide-base-300">
+     
         ${postsListCard()}
         ${postsListCard()}
         ${postsListCard()}

@@ -142,6 +142,7 @@ export const route = async (request: Request, env: Env) => {
                         name            : ctx.req.user!.name,
                         thumb           : ctx.req.user!.thumb,
                         level           : ctx.req.user!.level,
+                        pronouns        : ctx.req.user!.pronouns,
                         stars           : ctx.req.user!.stars,
                         creds           : ctx.req.user!.creds,
                         gil             : ctx.req.user!.gil,
