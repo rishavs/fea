@@ -5,9 +5,7 @@ import { errorCard } from "../../views/errorCard";
 
 
 export const showError = async (ctx: Context): Promise<Response> => {
-    let url = new URL(ctx.req.url)
-    let fragments = url.pathname.split("/")
-    let errorHeader = fragments[2] ? fragments[2] as ServerErrorHeaderType : null;
+    let errorHeader = ctx.req.params.slug ? ctx.req.params.slug as ServerErrorHeaderType : null;
     let sError: ServerError;
 
     // If this is a handled error, render the specific error page

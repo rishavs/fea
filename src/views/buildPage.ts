@@ -75,12 +75,12 @@ export const buildPage = (ctx: Context, page: Page) => {
             <!-- right drawer -->
             <div class="drawer drawer-end lg:drawer-open">
                 <input id="right-sidebar" type="checkbox" class="drawer-toggle" />
-                <div class="drawer-content flex flex-col items-center justify-center border border-base-300">
+                <div class="drawer-content flex flex-col items-center justify-center border border-base-300 px-1 lg:px-4">
 
                     <!-----------------------
                     Header Content
                     ------------------------>
-                    <header id="header_container" class="navbar sticky top-0 bg-info opacity-90 rounded-b-box lg:rounded-box border border-base-300 shadow-lg h-8 lg:h-20 px-4 lg:px-8 lg:mt-24 z-10">
+                    <header id="header_container" class="navbar sticky top-0 bg-primary opacity-90 rounded-b-box lg:rounded-box border border-base-300 shadow-lg h-8 lg:h-20 px-4 lg:px-6 lg:mt-24 z-10 mb-2 lg:mb-4">
                         ${header()}
                     </header>
 

@@ -58,11 +58,11 @@ export const pageRoutes: AppRoute[] = [
     setRoute('GET', `/signout`, ['user', 'moderator', 'admin'], signout),
 
     // Dynamic error routes
-    setRoute('GET', `/error/:id`, ['anonymous'], showError),
+    setRoute('GET', `/error/:slug`, ['anonymous'], showError),
     
     // Dynamic page routes
     setRoute('GET', `/:cat`, ['anonymous'], showPostsList),
-    setRoute('GET', `/:cat/:id`, ['anonymous'], showPostDetails),
+    setRoute('GET', `/:cat/:slug`, ['anonymous'], showPostDetails),
     setRoute('GET', `/user/:slug`, ['anonymous'], showUserDetails),
 ];
 

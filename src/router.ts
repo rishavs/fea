@@ -164,6 +164,7 @@ export const route = async (request: Request, env: Env) => {
         for (const {method, path, allow, handler } of pageRoutes) {
             let match = path.exec(url);
             if (request.method === method && match) {
+                console.log("Match: ", match);
                 ctx.req.params = match.pathname.groups;
                 ctx.req.allow = allow;
 
