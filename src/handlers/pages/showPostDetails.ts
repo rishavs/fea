@@ -6,7 +6,7 @@ export const showPostDetails = async (ctx: Context): Promise<Response> => {
     page.title = `Viewing Post ${ctx.req.params.slug}`
     page.content = /*html*/`
 <article>
-    <div class="my-4 flex w-full flex-col gap-4 rounded-box border border-base-300 bg-base-100 px-2 py-2 shadow-lg lg:gap-4 lg:p-4">
+    <div class="my-4 flex w-full flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-4 shadow-lg lg:gap-4 lg:p-4">
         <span class="badge">
         <svg xmlns="http://www.w3.org/2000/svg" class="size-4 fill-accent lg:size-6" viewBox="0 0 512 512">
             <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
@@ -24,12 +24,12 @@ export const showPostDetails = async (ctx: Context): Promise<Response> => {
             <span class="px-2">www.google.com</span>
             </div>
         </div>
-        <a class="line-clamp-2 link link-hover">
+        <a class="line-clamp-3 link link-hover">
             <span class="inline-flex items-baseline">
             <img src="https://picsum.photos/200" class="size-4 self-center rounded-field lg:size-6" />
             <span>&thinsp;</span>
             </span>
-            <span class="prose prose-sm font-semibold lg:prose-base"> Dio Lupa captivated audiences with its intense energy and mysterious lyrics its haunting sound and emotional depth. A viral performance brought it widespread captivated audiences with its intense energy and mysterious lyrics its haunting sound and emotional depth</span>
+            <span class="prose prose-sm font-semibold lg:prose-lg"> Dio Lupa captivated audiences with its intense energy and mysterious lyrics its haunting sound and emotional depth. A viral performance brought it widespread captivated audiences with its intense energy and mysterious lyrics its haunting sound and emotional depth</span>
         </a>
         </div>
 
@@ -64,7 +64,7 @@ export const showPostDetails = async (ctx: Context): Promise<Response> => {
         <div class="flex gap-2">
             <img class="size-10 rounded-box" src="https://img.daisyui.com/images/profile/demo/1@94.webp" />
             <div class="flex flex-col justify-between">
-            <div class="link text-xs link-hover">Count Dio Lupa Berrius the third</div>
+            <div class="link text-xs lg:text-sm link-hover">Count Dio Lupa Berrius the third</div>
             <div class="text-xs opacity-60">She/Her</div>
             </div>
         </div>
@@ -74,7 +74,7 @@ export const showPostDetails = async (ctx: Context): Promise<Response> => {
 
         <hr class="border-base-300" />
 
-        <span class="prose prose-sm max-w-none px-2 lg:prose-base lg:px-4">Remaining Reason became an instant hit, praised for its haunting sound and emotional depth. A viral performance brought it widespread recognition, making it one of Dio Lupa’s most iconic tracks. Remaining Reason became an instant hit, praised for its haunting sound and emotional depth. A viral performance brought it widespread recognition</span>
+        <span class="prose prose-sm max-w-none lg:prose-base">Remaining Reason became an instant hit, praised for its haunting sound and emotional depth. A viral performance brought it widespread recognition, making it one of Dio Lupa’s most iconic tracks. Remaining Reason became an instant hit, praised for its haunting sound and emotional depth. A viral performance brought it widespread recognition</span>
 
         <div class="-mx-1 rounded-box border border-base-300 bg-base-200 shadow-inner">
         <div class="m-1 flex justify-between rounded-box bg-base-100 shadow">

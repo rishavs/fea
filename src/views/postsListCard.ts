@@ -1,7 +1,7 @@
 export const postsListCard = () => {
     return /*html*/ `    
 <li class="group flex flex-col rounded-box border border-base-300 bg-base-100 shadow-lg">
-    <div class="flex p-1 lg:p-2">
+    <div class="flex p-1 lg:p-4">
       <div class="avatar">
         <div class="w-18 rounded-box border border-base-300 lg:w-48">
           <img alt="thumbnail" src="https://picsum.photos/200" />
@@ -17,12 +17,12 @@ export const postsListCard = () => {
                 <span class="px-2">www.google.com</span>
               </div>
             </div>
-            <a class="line-clamp-2 link link-hover">
+            <a class="line-clamp-2 lg:line-clamp-3 link link-hover">
               <span class="inline-flex items-baseline">
                 <img src="https://picsum.photos/200" class="size-4 self-center rounded-field lg:size-6" />
                 <span>&thinsp;</span>
               </span>
-              <span class="prose prose-sm font-semibold lg:prose-base"> Dio Lupa captivated audiences with its intense energy and mysterious lyrics its haunting sound and emotional depth. A viral performance brought it widespread captivated audiences with its intense energy and mysterious lyrics its haunting sound and emotional depth</span>
+              <span class="prose prose-sm font-semibold lg:prose-lg"> Dio Lupa captivated audiences with its intense energy and mysterious lyrics its haunting sound and emotional depth. A viral performance brought it widespread captivated audiences with its intense energy and mysterious lyrics its haunting sound and emotional depth</span>
             </a>
           </div>
 
@@ -75,7 +75,7 @@ export const postsListCard = () => {
     </div>
 
     <!-- Buttons bar-->
-    <div class="mx-1 mb-1 rounded-box border border-base-300 bg-base-200 shadow-inner">
+    <div class="mx-1 mb-1 lg:mx-4 lg:mb-4 rounded-box border border-base-300 bg-base-200 shadow-inner">
       <div class="m-1 flex justify-between rounded-box bg-base-100 shadow">
         <div class="join">
           <button class="btn w-18 rounded-box rounded-r-none btn-sm btn-soft btn-warning lg:w-48 lg:btn-md">

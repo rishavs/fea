@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "deploy": "wrangler deploy",
-        "dev": "wrangler dev --remote",
+        "dev": "wrangler dev --remote --live-reload",
         "style": "npx tailwindcss -i ./src/style.css -o ./pub/main.css --watch",
         "type": "wrangler types"
     },
@@ -22,6 +22,6 @@
         "tailwindcss": "^4.0.3",
         "typescript": "^5.5.2",
         "typescript-lit-html-plugin": "^0.9.0",
-        "wrangler": "^3.60.3"
+        "wrangler": "^4.14.1"
     }
 }
