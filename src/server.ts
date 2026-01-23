@@ -1,15 +1,7 @@
-import { route } from "./router";
+import { Hono } from 'hono';
+const app = new Hono();
 
-export default {
-	/**
-	 * This is the standard fetch handler for a Cloudflare Worker
-	 *
-	 * @param request - The request submitted to the Worker from the client
-	 * @param env - The interface to reference bindings declared in wrangler.toml
-	 * @param ctx - The execution context of the Worker
-	 * @returns The response to be sent back to the client
-	 */
-	async fetch(request, env, ctx): Promise<Response> {
-		return route(request, env)
-	},
-} satisfies ExportedHandler<Env>;
+app.get('/post/:id', (c) => c.text('Post ID: ' + c.req.param('id')));
+app.get('/', (c) => c.text('Hello Cloudflare Worksers!'));
+
+export default app;

@@ -21,7 +21,7 @@ binding = "STATIC_FILES"
 # id = "0f19e949cec340108bfe5687d5570b4e"
 
 [build]
-command = "clear && npx tailwindcss -i ./src/style.css -o ./pub/main.css"
+command = "npx tailwindcss -i ./src/style.css -o ./pub/main.css"
 
 # Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#r2-buckets

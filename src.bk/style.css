@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+    exclude: rootscrollgutter;
+    themes: light --default, dark --prefersdark, nord;
+}
+
+@plugin "daisyui/theme" {
+    name: "nord";
+    default: true;
+    --color-primary: oklch(58% 0.158 241.966); 
+    --color-primary-content: oklch(100% 0 0);
+
+    --color-secondary: oklch(83.242% 0.139 82.95);
+    --color-secondary-content: oklch(0% 0 0);
+    
+    --color-accent: oklch(71.785% 0.17 13.118);
+    --color-accent-content: oklch(0% 0 0);
+}
+@plugin "daisyui/theme" {
+    name: "dracula";
+    default: true;
+    --color-primary: oklch(58% 0.158 241.966); 
+    --color-primary-content: oklch(100% 0 0);
+
+    --color-secondary: oklch(83.242% 0.139 82.95);
+    --color-secondary-content: oklch(0% 0 0);
+    
+    --color-accent: oklch(71.785% 0.17 13.118);
+    --color-accent-content: oklch(0% 0 0);
+}
+
+@theme {
+    /* --color-dblue: oklch(58% 0.158 241.966); 
+    --color-dblue-content: oklch(100% 0 0);
+
+    --color-dyellow: oklch(83.242% 0.139 82.95);
+    --color-dyellow-content: oklch(0% 0 0);
+    
+    --color-dred: oklch(71.785% 0.17 13.118);
+    --color-dred-content: oklch(0% 0 0);
+
+    --color-primary: oklch(58% 0.158 241.966); 
+    --color-primary-content: oklch(100% 0 0);
+
+    --color-secondary: oklch(83.242% 0.139 82.95);
+    --color-secondary-content: oklch(0% 0 0);
+    
+    --color-accent: oklch(71.785% 0.17 13.118);
+    --color-accent-content: oklch(0% 0 0); */
+
+}
+
+@plugin "@tailwindcss/typography";

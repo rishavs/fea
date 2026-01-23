@@ -1,27 +1,30 @@
 {
-    "name": "fea",
-    "version": "0.0.0",
-    "private": true,
-    "scripts": {
-        "deploy": "wrangler deploy",
-        "dev": "wrangler dev --remote --live-reload",
-        "style": "npx tailwindcss -i ./src/style.css -o ./pub/main.css --watch",
-        "type": "wrangler types"
-    },
-    "dependencies": {
-        "@supabase/supabase-js": "^2.42.7",
-        "jose": "^5.2.3",
-        "nanoid": "^5.0.6"
-    },
-    "devDependencies": {
-        "@cloudflare/workers-types": "^4.20241230.0",
-        "@tailwindcss/cli": "^4.0.3",
-        "@tailwindcss/forms": "^0.5.10",
-        "@tailwindcss/typography": "^0.5.16",
-        "daisyui": "^5.0.0-beta.6",
-        "tailwindcss": "^4.0.3",
-        "typescript": "^5.5.2",
-        "typescript-lit-html-plugin": "^0.9.0",
-        "wrangler": "^4.14.1"
-    }
+	"name": "fea",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy --minify",
+		"dev": "wrangler dev --live-reload",
+		"style": "npx tailwindcss -i ./src/style.css -o ./pub/main.css --watch",
+		"type": "wrangler types",
+		"cf-typegen": "wrangler types --env-interface CloudflareBindings"
+	},
+	"dependencies": {
+		"@supabase/supabase-js": "^2.42.7",
+		"jose": "^5.2.3",
+		"nanoid": "^5.0.6",
+		"better-auth": "^1.4.17",
+		"hono": "^4.11.5"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20241230.0",
+		"@tailwindcss/cli": "^4.0.3",
+		"@tailwindcss/forms": "^0.5.10",
+		"@tailwindcss/typography": "^0.5.16",
+		"daisyui": "^5.0.0-beta.6",
+		"tailwindcss": "^4.0.3",
+		"typescript": "^5.5.2",
+		"typescript-lit-html-plugin": "^0.9.0",
+		"wrangler": "^4.14.1"
+	}
 }
