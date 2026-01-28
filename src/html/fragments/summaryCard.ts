@@ -19,8 +19,8 @@ export const buildSummaryCards = () => {
 				`post-${i}`,
 				`Category ${i}` as any, // Assuming categories are strings, adjust as necessary
 				`Post ${i} Description`,
-				i * 100
-			)
+				i * 100,
+			),
 		);
 	}
 
@@ -31,8 +31,8 @@ export const buildSummaryCards = () => {
 				`top-post-${i}`,
 				`Category ${i}` as any, // Assuming categories are strings, adjust as necessary
 				`Top Post ${i} Description`,
-				i * 200
-			)
+				i * 200,
+			),
 		);
 	}
 
@@ -43,8 +43,8 @@ export const buildSummaryCards = () => {
 				`friend-post-${i}`,
 				`Category ${i}` as any, // Assuming categories are strings, adjust as necessary
 				`Friend's Post ${i} Description`,
-				i * 50
-			)
+				i * 50,
+			),
 		);
 	}
 
