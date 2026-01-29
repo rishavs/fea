@@ -1,110 +1,36 @@
+import { createAuthClient } from 'https://esm.sh/better-auth@1.4.17/client';
+
 // ---------------------------------------
 // Helpers
 // ---------------------------------------
-const cookieExists = (name) => {
-    return document.cookie.split(";").some(
-        (item) => item.trim().startsWith(name)
-    )
-}
-
 
 // ---------------------------------------
 // Auth
-// ---------------------------------------    
-if (cookieExists("D_SYNC_USER")) {
-    console.log("User Sync Triggered")
-    // parse the user object from the cookie & add each attribute into local storage
-    let user = JSON.parse(decodeURIComponent(
-        document.cookie.split("D_SYNC_USER=")[1].split(";")[0]
-    ));
-    Object.keys(user).forEach((key) => {
-        localStorage.setItem(key, user[key] === 'null' ? "" : user[key]);
-    });
+// ---------------------------------------
+const client = createAuthClient();
 
-    // eat the new session cookie
-    document.cookie = "D_SYNC_USER=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+// Sign in function
+window.signIn = async () => {
+	await client.signIn.social({
+		provider: 'google',
+		callbackURL: '/signin',
+	});
+};
 
-    // refresh the page
-    window.location.reload();
-} 
+// Sign out function
+window.signOut = async () => {
+	await client.signOut();
 
-// if (cookieExists("D_FRE")) {
-//     console.log("FRE Triggered")
-//     // open fre modal
-//     let freModal = document.getElementById('fre_modal');
-//     // @ts-ignore
-//     freModal.showModal();
+	//delete all user info cookies
+	await cookieStore.delete('user_slug');
+	await cookieStore.delete('user_name');
+	await cookieStore.delete('user_thumb');
+	await cookieStore.delete('user_pronouns');
+	await cookieStore.delete('user_role');
+	await cookieStore.delete('user_level');
 
-//     freModal.addEventListener('focus', () => {
-//         console.log("FRE Modal Loaded")
-//         // eat the fre cookie
-//         document.cookie = "D_FRE=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-//     });
-// }
-
-if (cookieExists("D_SEND_USER_INFO")) {
-    console.log("User Info Sync Triggered")
-
-    // make a POST request to the server with the user info from navigator
-    try {
-        const userData = {
-            navigator: {
-                connection: {
-                    downlink:       navigator.connection.downlink,
-                    effectiveType:  navigator.connection.effectiveType,
-                    rtt:            navigator.connection.rtt,
-                    saveData:       navigator.connection.saveData,
-                },
-                userAgent:          navigator.userAgent,
-                userAgentData: {
-                    brands:         navigator.userAgentData.brands,
-                    mobile:         navigator.userAgentData.mobile,
-                },
-                platform:           navigator.platform,
-                language:           navigator.language,
-            },
-            window: {
-                width:              window.innerWidth,
-                height:             window.innerHeight,
-                pixel_ratio:        window.devicePixelRatio,
-                orientation:        window.screen.orientation.type,
-            },
-        }
-        const response = fetch("/api/save-user-demographic-info", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
-        })
-        .then(response => {
-            if (!response.ok) {
-                console.error('Fetch Error:', response);
-            } else {
-                document.cookie = "D_SEND_USER_INFO=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                console.log("The following User Info was sent to the server: ", userData)
-            }
-        })
-
-
-    }
-    catch (error) {
-        console.error("Error sending user info", error)
-        // TODO - signout & redirect to error page
-    }
-
-
-}
-
-
-signout_action.addEventListener("click", () => {
-    console.log("Starting signout process....")
-    // remove user details from client
-    localStorage.clear();
-
-    // signout
-    window.location.href = '/signout';
-})
+	window.location.href = '/';
+};
 
 // ------------------------------------------
 // TODO - Tell the user about the punishment status, if any
@@ -120,63 +46,86 @@ signout_action.addEventListener("click", () => {
 //     ctx.res.headers.append('Set-Cookie', `D_TOAST_BAN=You are banned till ${user.banned_till}; path=/; SameSite=Strict;`)
 // }
 
-
 // ---------------------------------------
 // Hydrate user profile components
 // ---------------------------------------
-if (app.user && app.user.is_signed_in) {
-    // Hydrate the header
-    document.querySelectorAll('[data-role="signedin_controls"]').forEach((el) => {
-        el.classList.remove('hidden');
-    })
-    document.querySelectorAll('[data-role="unsignedin_controls"]').forEach((el) => {
-        el.classList.add('hidden');
-    })
+window.user = {};
+window.user.slug = await cookieStore.get('user_slug');
+window.user.name = await cookieStore.get('user_name');
+window.user.thumb = await cookieStore.get('user_thumb');
+window.user.pronouns = await cookieStore.get('user_pronouns');
+window.user.role = await cookieStore.get('user_role');
+window.user.level = await cookieStore.get('user_level');
 
-    document.querySelectorAll('[data-role="user-profile-img"]').forEach((el) => {
-        // @ts-ignore
-        el.src = decodeURIComponent(app.user.thumb)
-    })
+console.log('User info from cookies:', window.user);
 
-    document.querySelectorAll('[data-role="user-profile-name"]').forEach((el) => {
-        el.textContent = decodeURIComponent(app.user.name)
-    })
+if (window.user.slug && window.user.slug.value !== 'undefined') {
+	console.log('Hydrating user profile components for user:', window.user);
+	// Hydrate the header
+	document.querySelectorAll('[data-role="signedin_controls"]').forEach((el) => {
+		el.classList.remove('hidden');
+	});
+	document
+		.querySelectorAll('[data-role="unsignedin_controls"]')
+		.forEach((el) => {
+			el.classList.add('hidden');
+		});
 
-    document.querySelectorAll('[data-role="user-profile-pronouns"]').forEach((el) => {
-        // @ts-ignore
-        el.textContent = decodeURIComponent(app.user.pronouns)
-    })
+	document.querySelectorAll('[data-role="user-profile-img"]').forEach((el) => {
+		// @ts-ignore
+		el.src = decodeURIComponent(window.user.thumb.value);
+	});
+
+	document.querySelectorAll('[data-role="user-profile-name"]').forEach((el) => {
+		el.textContent = decodeURIComponent(window.user.name.value);
+	});
+
+	document
+		.querySelectorAll('[data-role="user-profile-pronouns"]')
+		.forEach((el) => {
+			// @ts-ignore
+			el.textContent = decodeURIComponent(window.user.pronouns.value);
+		});
 }
 
-// update the user details in local storage when the user updates their profile 
-window.addEventListener("storage", (event) => {
-    if (event.key === 'name') {
-        console.log("Detected update to user name. Refreshing DOM", event.newValue)
-        document.querySelectorAll('[data-role="user-profile-name"]').forEach((el) => {
-            el.textContent = decodeURIComponent(event.newValue)
-        })
-    }
-    if (event.key === 'pronouns') {
-        console.log("Detected update to user pronouns. Refreshing DOM", event.newValue)
-        document.querySelectorAll('[data-role="user-profile-pronouns"]').forEach((el) => {
-            el.textContent = decodeURIComponent(event.newValue)
-        })
-    }
-    if (event.key === 'thumb') {
-        console.log("Detected update to user thumb. Refreshing DOM", event.newValue)
-        document.querySelectorAll('[data-role="user-profile-img"]').forEach((el) => {
-            // @ts-ignore
-            el.src = decodeURIComponent(event.newValue)
-        })
-    }
-  });
-  
-
-
+// update the user details in local storage when the user updates their profile
+window.addEventListener('storage', (event) => {
+	if (event.key === 'name') {
+		console.log('Detected update to user name. Refreshing DOM', event.newValue);
+		document
+			.querySelectorAll('[data-role="user-profile-name"]')
+			.forEach((el) => {
+				el.textContent = decodeURIComponent(event.newValue);
+			});
+	}
+	if (event.key === 'pronouns') {
+		console.log(
+			'Detected update to user pronouns. Refreshing DOM',
+			event.newValue,
+		);
+		document
+			.querySelectorAll('[data-role="user-profile-pronouns"]')
+			.forEach((el) => {
+				el.textContent = decodeURIComponent(event.newValue);
+			});
+	}
+	if (event.key === 'thumb') {
+		console.log(
+			'Detected update to user thumb. Refreshing DOM',
+			event.newValue,
+		);
+		document
+			.querySelectorAll('[data-role="user-profile-img"]')
+			.forEach((el) => {
+				// @ts-ignore
+				el.src = decodeURIComponent(event.newValue);
+			});
+	}
+});
 
 // // ---------------------------------------
 // // FRE Modal
-// // ---------------------------------------    
+// // ---------------------------------------
 let fre_modal = document.getElementById('fre_modal');
 
 // // Hydrate form
@@ -218,7 +167,6 @@ let fre_modal = document.getElementById('fre_modal');
 //         reader.readAsDataURL(file);
 //     })
 
-
 //     // Handle form submission
 //     user_details_form.addEventListener("submit", (event) => {
 //         event.preventDefault(); // Prevent the default form submission
@@ -228,7 +176,7 @@ let fre_modal = document.getElementById('fre_modal');
 //         fre_modal.close();
 
 //         // skip submission if the no data is changed
-//         if (user_data.get('name') === localStorage.getItem('name') 
+//         if (user_data.get('name') === localStorage.getItem('name')
 //             && user_data.get('pronouns') === localStorage.getItem('pronouns')
 //             && user_data.get('thumb').name === ""
 //         ) {

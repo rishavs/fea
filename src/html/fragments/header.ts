@@ -1,5 +1,9 @@
 export const header = () => {
 	return /*html*/ `
+<script type="module">
+    
+</script>
+
 <div class="navbar-start gap-2">
     <label for="left-sidebar" class="btn btn-square btn-soft swap swap-rotate lg:hidden">
         <!-- this hidden checkbox controls the state -->
@@ -30,7 +34,7 @@ export const header = () => {
     </button>
 
     <!-- Signin -->
-    <a data-role="unsignedin_controls" href="/signin/google" class="btn btn-square">
+    <a data-role="unsignedin_controls" onclick="signIn()" class="btn btn-square">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="size-6">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -89,7 +93,7 @@ export const header = () => {
                 </a>
             </li>
             <li>
-                <a id="signout_action">
+                <a id="signout_action" onclick="signOut()">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
                     </svg>

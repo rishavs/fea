@@ -8,11 +8,14 @@ import { show404Error } from './handlers/show404Error';
 import { HTTPException } from 'hono/http-exception';
 import { showErrorPage } from './handlers/showErrorPage';
 import postgres from 'postgres';
+import { signin } from './handlers/signin';
 
 type Variables = {
 	sql: ReturnType<typeof postgres>;
 };
 const app = new Hono<{ Bindings: CloudflareBindings; Variables: Variables }>();
+
+// Setup the db connection in the context
 app.use('*', async (c, next) => {
 	const connString =
 		c.env.HYPERDRIVE?.connectionString ??
@@ -25,7 +28,6 @@ app.use('*', async (c, next) => {
 app.get('/pingdb', async (c) => {
 	const sql = c.get('sql');
 	const result = await sql`SELECT 1 as result`;
-	await sql.end();
 	return c.json({ dbResult: result[0].result });
 });
 
@@ -77,6 +79,8 @@ app.use(
 app.on(['POST', 'GET'], '/api/auth/*', (c) => {
 	return auth(c.env).handler(c.req.raw);
 });
+
+app.get('/signin', (c) => signin(c));
 
 app.get('/session', async (c) => {
 	console.log(c.env);
