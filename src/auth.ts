@@ -5,8 +5,6 @@ export const auth = (
 	env: CloudflareBindings,
 ): ReturnType<typeof betterAuth> => {
 	return betterAuth({
-		baseURL: env.BETTER_AUTH_URL,
-		secret: env.BETTER_AUTH_SECRET,
 		socialProviders: {
 			google: {
 				clientId: env.GOOGLE_CLIENT_ID,
