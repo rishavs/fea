@@ -5,9 +5,8 @@ import { Queries } from '../db';
 import { User, UserLevel, UserPronoun, UserRole } from '../models/users';
 import { customAlphabet } from 'nanoid';
 import { randomBetween } from '../utils';
-import { getRandomSlug } from '../slug';
+import { getRandomUserSlug } from '../slug';
 import { setCookie } from 'hono/cookie';
-import { set } from 'better-auth';
 
 export const signin = async (c: Context) => {
 	// 1. if session not exists in cookie, raise error
@@ -42,7 +41,7 @@ export const signin = async (c: Context) => {
 				'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
 				32,
 			)(),
-			slug: getRandomSlug(),
+			slug: getRandomUserSlug(),
 			name: 'Nony Mouse',
 			thumb: c.env.IMAGE_HOST + '/default0' + randomBetween(1, 8) + '.png',
 			pronouns: UserPronoun.None,
@@ -50,8 +49,15 @@ export const signin = async (c: Context) => {
 			level: UserLevel.leaf,
 		};
 
+		// TODO - check if user slug exists
+		// if (Queries.countSimilarUserSlugs(c, user.slug) > 0) {
+
 		await Queries.createUser(c, user);
 		console.log('Created new user in db:', user);
+
+		// Trigger FRE
+		//TODO: make all cookies https
+		setCookie(c, 'show_fre', 'true');
 	} else {
 		user = result[0];
 	}

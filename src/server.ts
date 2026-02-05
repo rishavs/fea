@@ -43,6 +43,7 @@ app.get('/throw', (c) => {
 app.get('/raise', (c) => {
 	throw new Error('Just a regular error', { cause: 'Because I felt like it' });
 });
+// TODO - revamp. handle api errors as well.
 app.onError((err, c) => showErrorPage(c, err));
 
 // ---------------------------------------------------------------
@@ -63,6 +64,13 @@ app.use(
 		credentials: true,
 	}),
 );
+// Middleware to prevent caching of sensitive routes
+// app.use('/auth/*', async (c, next) => {
+//   await next()
+//   c.header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+//   c.header('Pragma', 'no-cache')
+//   c.header('Expires', '0')
+// })
 app.on(['POST', 'GET'], '/api/auth/*', (c) => {
 	return auth(c.env).handler(c.req.raw);
 });

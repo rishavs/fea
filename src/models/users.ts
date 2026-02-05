@@ -1,3 +1,5 @@
+import * as v from 'valibot';
+
 export enum UserRole {
 	admin = 'admin',
 	moderator = 'moderator',
@@ -21,6 +23,16 @@ export enum UserPronoun {
 	They_Them = 'They/Them',
 }
 
+export const UserSchema = {
+	nameMinLength: 4,
+	nameMaxLength: 32,
+	slugMinLength: 8,
+	slugMaxLength: 64,
+	thumbMinSize: 1,
+	thumbMaxSize: 1024 * 1024,
+	thumbFileTypes: ['image/jpeg', 'image/png', 'image/webp'],
+};
+
 // Note: all fields are in snake_case to match the DB columns
 export type User = {
 	id?: string;
@@ -43,15 +55,4 @@ export type User = {
 	created_at?: Date;
 	updated_at?: Date;
 	deleted_at?: Date;
-};
-
-
-export const UserSchema = {
-	nameMinLength: 4,
-	nameMaxLength: 32,
-	slugMinLength: 8,
-	slugMaxLength: 64,
-	thumbMinSize: 1,
-	thumbMaxSize: 1024 * 1024,
-	thumbFileTypes: ['image/jpeg', 'image/png', 'image/webp'],
 };

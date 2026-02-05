@@ -45,6 +45,16 @@ export const Queries = {
 		`;
 	},
 
+	countSimilarUserSlugs: async (c: Context, slug: string) => {
+		const sql = c.get('sql');
+		const result = await sql<{ count: number }[]>`
+			select count(*)::int
+			from users
+			where slug LIKE ${slug}%
+		`;
+		return result[0].count;
+	},
+
 	countSimilarPostSlugs: async (c: Context, slug: string) => {
 		const sql = c.get('sql');
 		const result = await sql<{ count: number }[]>`

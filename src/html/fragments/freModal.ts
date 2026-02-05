@@ -2,7 +2,7 @@ import { UserPronoun, UserSchema } from '../../models/users';
 
 export const freModal = () => {
 	return /*html*/ `
-<dialog id="fre_modal" class="modal modal-bottom lg:modal-middle">
+<dialog id="fre_modal" open class="modal modal-bottom lg:modal-middle">
     <div class="modal-box">
 
         <form method="dialog">
@@ -33,8 +33,8 @@ export const freModal = () => {
                     </span>
                 </label>
                 <input id="user_name_input" name="name" type="text" class="input input-bordered w-full invalid:border-error valid:border-success" required minLength="${
-					UserSchema.nameMinLength
-				}" maxLength="${UserSchema.nameMaxLength}" />
+									UserSchema.nameMinLength
+								}" maxLength="${UserSchema.nameMaxLength}" />
                 
             </fieldset>
 
@@ -45,8 +45,8 @@ export const freModal = () => {
                 </label>
 
                 <input id="user_thumb_input" name="thumb" type="file" class="file-input file-input-bordered w-full invalid:border-error valid:border-success" accept=${UserSchema.thumbFileTypes.join(
-					','
-				)} />
+									',',
+								)} />
 
             </fieldset>
 
@@ -59,10 +59,10 @@ export const freModal = () => {
                 <select id="user_pronouns_select" name="pronouns" class="select select-bordered w-full invalid:border-error valid:border-success">
 
                     ${Object.values(UserPronoun)
-						.map((item, i) => {
-							return `<option class=" text-xl">${item}</option>`;
-						})
-						.join('')}
+											.map((item, i) => {
+												return `<option class=" text-xl">${item}</option>`;
+											})
+											.join('')}
                 </select>
             </fieldset>
 

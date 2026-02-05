@@ -15,7 +15,8 @@
 		"hono": "^4.11.5",
 		"jose": "^5.2.3",
 		"nanoid": "^5.0.6",
-		"postgres": "^3.4.8"
+		"postgres": "^3.4.8",
+		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20241230.0",
