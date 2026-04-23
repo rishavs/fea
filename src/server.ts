@@ -1,5 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { requestId } from 'hono/request-id';
+import { pinoHttp } from 'pino-http';
 
 import { auth } from './auth';
 import { showPostDetails } from './handlers/showPostDetails';
@@ -14,6 +16,21 @@ type Variables = {
 	sql: ReturnType<typeof postgres>;
 };
 const app = new Hono<{ Bindings: CloudflareBindings; Variables: Variables }>();
+// app.use(requestId());
+
+// app.use(async (c, next) => {
+// 	// pass hono's request-id to pino-http
+// 	c.env.incoming.id = c.var.requestId;
+
+// 	// map express style middleware to hono
+// 	await new Promise((resolve) =>
+// 		pinoHttp()(c.env.incoming, c.env.outgoing, () => resolve()),
+// 	);
+
+// 	c.set('logger', c.env.incoming.log);
+
+// 	await next();
+// });
 
 // Setup the db connection in the context
 app.use('*', async (c, next) => {
@@ -65,6 +82,9 @@ app.use(
 	}),
 );
 // Middleware to prevent caching of sensitive routes
+// This is important to ensure that authentication-related responses are
+// not cached by browsers or intermediate proxies, which could lead to
+// security issues.
 // app.use('/auth/*', async (c, next) => {
 //   await next()
 //   c.header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')

@@ -143,19 +143,13 @@ if (fre_modal.open) {
 	console.log('FRE Modal is open. Hydrating form');
 	user_name_input.value = window.user.name;
 	user_name_input_char_count.innerText =
-		user_name_input.value.length +
-		'/' +
-		UserControlsSchema.nameMaxLength +
-		'chars';
+		user_name_input.value.length + '/' + UserSchema.nameMaxLength + 'chars';
 	user_pronouns_select.value = window.user.pronouns;
 
 	// Setup Interactivity
 	user_name_input.addEventListener('input', () => {
 		user_name_input_char_count.innerText =
-			user_name_input.value.length +
-			'/' +
-			UserControlsSchema.nameMaxLength +
-			'chars';
+			user_name_input.value.length + '/' + UserSchema.nameMaxLength + 'chars';
 		document
 			.querySelectorAll('[data-role="user-profile-name"]')
 			.forEach((el) => {
